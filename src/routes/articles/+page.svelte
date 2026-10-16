@@ -11,7 +11,7 @@
 	const tagQs = $derived(data.tag ? `&tag=${encodeURIComponent(data.tag)}` : '');
 </script>
 
-<section class="flex flex-col gap-6">
+<section class="fade-up flex flex-col gap-6">
 	<div class="flex items-center justify-between border-t border-border pt-4">
 		{#if data.tag}
 			<p class="font-brand text-sm font-medium text-muted-foreground">
