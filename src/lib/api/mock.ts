@@ -327,8 +327,9 @@ function summarize(post: PostDetail): PostSummary {
 }
 
 export const mockApi: BlogApi = {
-	async getPosts({ offset = 0, limit = posts.length } = {}) {
-		return { total: posts.length, items: posts.slice(offset, offset + limit).map(summarize) };
+	async getPosts({ offset = 0, limit = posts.length, tag } = {}) {
+		const source = tag ? posts.filter((p) => p.tags.includes(tag)) : posts;
+		return { total: source.length, items: source.slice(offset, offset + limit).map(summarize) };
 	},
 
 	async getPost(slug) {

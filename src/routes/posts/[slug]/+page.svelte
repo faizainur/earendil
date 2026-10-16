@@ -16,8 +16,9 @@
 	});
 	let date = $derived(dateFormatter.format(new Date(data.post.date)));
 
-	// Non-interactive soft-fill pills — distinct from the site's bordered/hoverable buttons.
-	const chip = 'rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground';
+	// Chip pills are clickable tag filters: soften->deepen fill, foreground text, slight lift.
+	const chip =
+		'rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground transition-all duration-150 hover:bg-foreground/10 hover:text-foreground hover:-translate-y-0.5';
 </script>
 
 <article class="grid grid-cols-12 gap-8">
@@ -31,7 +32,7 @@
 				{#if data.post.tags.length > 0}
 					<div class="flex flex-wrap gap-1.5 border-t border-border pt-4">
 						{#each data.post.tags as tag (tag)}
-							<span class={chip}>{tag}</span>
+							<a href="/articles?tag={encodeURIComponent(tag)}" class={chip}>{tag}</a>
 						{/each}
 					</div>
 				{/if}
@@ -60,7 +61,7 @@
 				<span aria-hidden="true">·</span>
 				<span>{data.post.readTime} min read</span>
 				{#each data.post.tags as tag (tag)}
-					<span class={chip}>{tag}</span>
+					<a href="/articles?tag={encodeURIComponent(tag)}" class={chip}>{tag}</a>
 				{/each}
 			</div>
 			{#if data.toc.length > 0}

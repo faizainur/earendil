@@ -30,6 +30,14 @@ describe('getPosts', () => {
 		expect(items[0]).not.toHaveProperty('content');
 		expect(items[0]).not.toHaveProperty('tags');
 	});
+
+	it('filters by tag', async () => {
+		const { total, items } = await mockApi.getPosts({ tag: 'queues' });
+		expect(total).toBe(1);
+		expect(items[0].slug).toBe('shape-of-a-useful-queue');
+		const none = await mockApi.getPosts({ tag: 'nope' });
+		expect(none.items).toEqual([]);
+	});
 });
 
 describe('getPost', () => {

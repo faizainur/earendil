@@ -2,7 +2,7 @@ import { mockApi } from './mock';
 import type { PhotoListResponse, PostDetail, PostListResponse, SuggestResponse } from './types';
 
 export interface BlogApi {
-	getPosts(opts?: { offset?: number; limit?: number }): Promise<PostListResponse>;
+	getPosts(opts?: { offset?: number; limit?: number; tag?: string }): Promise<PostListResponse>;
 	getPost(slug: string): Promise<PostDetail>;
 	suggestPosts(q: string, limit?: number): Promise<SuggestResponse>;
 	getPhotos(opts?: { limit?: number }): Promise<PhotoListResponse>;
@@ -35,6 +35,7 @@ function createFetchApi(base: string): BlogApi {
 			const params = new URLSearchParams();
 			if (opts?.offset !== undefined) params.set('offset', String(opts.offset));
 			if (opts?.limit !== undefined) params.set('limit', String(opts.limit));
+			if (opts?.tag) params.set('tag', opts.tag);
 			const query = params.toString();
 			return get<PostListResponse>(`/api/posts${query ? `?${query}` : ''}`);
 		},
