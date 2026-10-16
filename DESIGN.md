@@ -31,6 +31,7 @@
 
 Layout shell (all pages):
 
+- **Route-change feedback**: a fixed 2px `--brand` violet progress bar rides across the top whenever SvelteKit navigates between pages — it eases to ~94% while loading, then sweeps to 100% and fades. Hover-preloaded routes finish in ~1 frame, so a small JS state machine guarantees a minimum visible beat (~280ms) before the fade. Hash-only jumps (TOC links) are excluded; reduced-motion gets a plain static bar.
 - **Container**: centered `max-w-page` (1120px) with generous equal side margins; content never stretches to full viewport. Mobile: `px-4`/`px-6` gutters.
 - **Navbar**: wordmark **`fzr;`** (Fraunces brand serif, `SOFT 40 / WONK 1`: `fzr` foreground + **violet semicolon** `--brand` — the accent is reserved to the punctuation, nothing else; serif is wordmark-only) + **4 links (Home · Articles · Gallery · About)** with pathname-derived active state (`aria-current="page"`) + **Search pill** + **Theme toggle**.
 - **Mobile nav**: links collapse into a **hamburger** (`md:hidden`); icon button toggles a dropdown panel under the header with stacked links; closes on link click, `Esc`, outside tap, and on navigation; `aria-expanded`/`aria-controls`.
@@ -131,7 +132,7 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the future search dialog.
 4. Theme-switch circular reveal — `::view-transition-*(root)` + `theme-reveal` keyframes (View Transitions API; pseudo-elements not reachable via utilities).
 5. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — photo strip, overflowing code blocks and masonry gutters; pseudo-elements aren't reachable via utilities.
-6. Route-change progress bar (`.route-progress`) — fixed 2px brand-violet bar; transform/opacity transitions driven by `page.navigating` (perceived loading on instant client navigations; hash-only jumps excluded).
+6. Route-change progress bar (`.route-progress`) — fixed 2px brand-violet bar; active/finishing/idle phases driven by `$app/state navigating` (minimum visible beat for preloaded instant navigations; hash-only jumps excluded).
 
 ## 8. Responsive matrix
 
