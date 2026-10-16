@@ -12,8 +12,7 @@
 	// svelte-ignore state_referenced_locally
 	let theme = $state(data.theme);
 
-	// $app/state's `navigating` is always an object with null fields when idle; the
-	// truthy gate is `to`. Hash-only jumps (TOC links) load nothing — don't flash.
+	// Hash-only jumps (TOC links) load nothing — don't flash.
 	const navLoading = $derived(
 		navigating.to !== null &&
 			!(
@@ -22,6 +21,21 @@
 				navigating.to.url.hash !== ''
 			)
 	);
+
+	// Preloaded navigations finish in ~1 frame; guarantee the bar a minimum
+	// visible beat: active while loading, then a finishing sweep to full + fade.
+	let barState = $state<'idle' | 'active' | 'finishing'>('idle');
+	let finishTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => {
+		if (navLoading) {
+			clearTimeout(finishTimer);
+			barState = 'active';
+		} else if (barState === 'active') {
+			barState = 'finishing';
+			finishTimer = setTimeout(() => (barState = 'idle'), 280);
+		}
+	});
 
 	function toggleTheme() {
 		const next = theme === 'dark' ? 'light' : 'dark';
@@ -44,7 +58,7 @@
 </svelte:head>
 
 <div class="flex min-h-svh flex-col bg-background text-foreground">
-	<div class="route-progress" data-phase={navLoading ? 'active' : 'idle'} aria-hidden="true"></div>
+	<div class="route-progress" data-phase={barState} aria-hidden="true"></div>
 	<Navbar {theme} onToggle={toggleTheme} />
 	<div class="mx-auto flex w-full max-w-page grow flex-col gap-12 px-5 py-12 md:px-8">
 		<main class="flex flex-1 flex-col gap-12">
