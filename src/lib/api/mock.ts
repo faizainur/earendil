@@ -335,6 +335,171 @@ Storing the key without the result is half a contract. Safe retries need the sam
 
 GETs are already idempotent, and most teams underestimate how much traffic can move to a fresh read replica instead of a retried write.
 `
+	},
+	{
+		slug: 'the-day-the-clock-jumped',
+		title: 'The day the clock jumped backward',
+		subtitle: 'What NTP taught me about monotonic time',
+		preview:
+			'A one-second negative adjustment turned a lease renewal into a two-second expiry, and the postmortem wrote itself. Wall clocks are stories we tell; monotonic clocks are the only ones services can trust.',
+		date: '2023-12-19',
+		readTime: 7,
+		thumbnail: null,
+		tags: ['time', 'linux', 'distributed-systems'],
+		content: `Every lease, timeout, and retry backoff in your system is a bet that time moves forward. NTP is the house that quietly corrects the bets — and sometimes it corrects them backward.
+
+## Two clocks, one process
+
+A process runs on at least two timelines: wall-clock time, which can jump in either direction, and monotonic time, which can only ever advance. Lease tables that store wall-clock deadlines are storing them wrong.
+
+\`\`\`go
+deadline := monotonic.Now().Add(leaseTTL) // survives an NTP step
+\`\`\`
+
+## The postmortem wrote itself
+
+The incident was tiny and total: a renewal that looked like an expiry, a lock handed to a second owner, and a burst of duplicate work. The fix was one clock change and a dashboard panel that shows clock adjustments as a first-class signal.
+`
+	},
+	{
+		slug: 'backups-are-fantasies-restores-are-real',
+		title: 'Backups are fantasies; restores are real',
+		subtitle: 'The only durability test that counts runs the restore path',
+		preview:
+			'Nobody has ever been saved by a backup they never restored. We rehearsed the restore on a Friday afternoon and found three of our four WAL archives were unreadable — the backup job had been green for months.',
+		date: '2023-12-05',
+		readTime: 5,
+		thumbnail: thumbnails[0],
+		tags: ['postgres', 'operations', 'durability'],
+		content: `A backup is a promise about the future, and promises need witnesses. The restore is the rehearsal that either keeps the promise or exposes it.
+
+## What the rehearsal found
+
+The archive retention job was rotating files the recovery script still needed, and one replica had been stale since a migration nobody mentioned in the runbook. Both were invisible from the backup side and obvious from the restore side.
+
+- Restore to a scratch cluster on a schedule, not only during incidents
+- Diff the restored state against a live replica automatically
+- Treat "backup succeeded" dashboards with deep suspicion until the restore proves them
+`
+	},
+	{
+		slug: 'your-index-is-a-budget',
+		title: 'Your index is a budget, not a feature',
+		subtitle: 'Every index spent write throughput to buy read latency',
+		preview:
+			'Indexes are a classic cost transfer: the reader gets speed, the writer pays, and the bill arrives silently in vacuum time and failover duration. The interesting question is never "can we add an index" but "what are we willing to make slower".',
+		date: '2023-11-21',
+		readTime: 8,
+		thumbnail: null,
+		tags: ['postgres', 'performance', 'storage'],
+		content: `A table without indexes is a full scan waiting to happen; a table with twelve is a write path with a tail attached. Both extremes are configuration errors.
+
+## Counting the quiet costs
+
+Every additional index is more work per write, more WAL, more bloat, longer vacuum cycles, and a longer recovery to replay after a crash. None of that appears on the query plan of the read you optimized.
+
+## A rule that held up
+
+Index the access patterns you measured, delete the ones the query planner never mentions, and re-audit quarterly. The index list is a budget: spend it on the reads that actually hurt.
+`
+	},
+	{
+		slug: 'the-small-cap-table-of-failure-licenses',
+		title: 'The small cap table of failure licenses',
+		subtitle: 'Every system is sold shares in what it will tolerate',
+		preview:
+			'Durability, availability, consistency, latency, cost: an architecture is a portfolio of who gets to fail. Naming the licenses out loud is the difference between a design and a wish.',
+		date: '2023-11-07',
+		readTime: 6,
+		thumbnail: null,
+		tags: ['architecture', 'distributed-systems', 'reliability'],
+		content: `Trade-off talks get stuck on CAP trilogies and forget the practical question: which failures is this system licensed to produce, and who signed off?
+
+## Issuing the licenses
+
+A synchronous replication policy licenses latency and forbids data loss. A cache with a long TTL licenses staleness and forbids read pressure. An eventual-consistency feed licenses confusion and forbids downtime.
+
+## Reading your own fine print
+
+The healthiest systems I have worked on had a page — a short, boring table: for each data flow, what can be late, what can be lost, what can be slow, what must never happen. When a new incident class appeared, we asked which line of the table allowed it, and either fixed the system or updated the table.
+`
+	},
+	{
+		slug: 'secrets-are-software',
+		title: 'Secrets are software',
+		subtitle: 'They rot, drift, and break builds like anything else',
+		preview:
+			'Treat credentials like code and the chores write themselves: versioning, rotation, provenance, blast-radius review. Treating them like magic scrollwork is how a single YAML file becomes an incident.',
+		date: '2023-10-24',
+		readTime: 9,
+		thumbnail: null,
+		tags: ['security', 'kubernetes', 'operations'],
+		content: `The moment a secret is pasted into a dashboard, it becomes undebuggable software: no version, no owner, no expiry, no diff.
+
+## Version everything
+
+\`\`\`yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: feed-writer
+  annotations:
+    rotation.deadline: "2023-12-01"
+\`\`\`
+
+A rotation deadline is an executable design decision; a rotation wiki page is a wish. The boring mechanics — sealed at deploy, consumed from the environment, logged with provenance — make the interesting questions (blast radius, ownership, expiry) tractable.
+
+## Audit the shadows
+
+Every secret that exists only in someone's terminal history is an outage in storage.
+`
+	},
+	{
+		slug: 'one-service-owns-the-clock',
+		title: 'One service owns the clock',
+		subtitle: 'Scheduling is a leadership problem wearing a timer costume',
+		preview:
+			'When two pods both believe it is their turn to run the cron job, the bug is not in the crontab — it is in the absence of a single owner. Fencing, leases, and boring leadership beat cleverness.',
+		date: '2023-10-10',
+		readTime: 7,
+		thumbnail: thumbnails[1],
+		tags: ['kubernetes', 'distributed-systems', 'scheduling'],
+		content: `A scheduled job is a tiny distributed system with exactly the same problems: mutual exclusion, failure detection, and the clock.
+
+## Leases, not locks
+
+The durable pattern is a lease: a TTL-based promise renewed on a monotonic timer, with a fencing token that makes stale owners provably stale. A lock without a deadline is a deadlock with extra steps; a lease without fencing is a lock that forgot who it is.
+
+## The ownership question
+
+Before reaching for a scheduler framework, answer the design question: which single component owns "when does this run, and did it already?" If nobody can name it, the cron job is a distributed system by accident — and it will behave like one.
+`
+	},
+	{
+		slug: 'the-panic-you-do-not-log',
+		title: "The panic you don't log",
+		subtitle: 'Error-handling is story design for whoever gets paged',
+		preview:
+			'Half of an incident is the bug; the other half is whether the logs can tell the story backward from the page. We deleted noisy errors, promoted three quiet ones to structured events, and the MTTR halved without fixing anything.',
+		date: '2023-09-26',
+		readTime: 5,
+		thumbnail: null,
+		tags: ['observability', 'go', 'logging'],
+		content: `Every error path is a small narrative decision: what will the next reader need, and how cheaply can they get it?
+
+## Delete the shouty, promote the quiet
+
+\`\`\`go
+slog.Error("lease renewal failed",
+	"attempt", n, "ttl", remaining, "leader", leaderID)
+\`\`\`
+
+Loud but vague logs are the opium of incident response: they feel like observability and deliver panic. The three structured events that survived our cull — lease handoff, queue-depth breach, dependency timeout — answer almost every page we get, because each one names its contract.
+
+## Log the promises, not the plumbing
+
+Log when a system breaks a promise the pager cares about; the plumbing already has a name in the trace.
+`
 	}
 ];
 

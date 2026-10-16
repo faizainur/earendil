@@ -5,9 +5,9 @@ import { mockApi } from './mock';
 describe('getPosts', () => {
 	it('returns all posts with correct total', async () => {
 		const { total, items } = await mockApi.getPosts();
-		expect(total).toBe(5);
-		expect(items).toHaveLength(5);
-		expect(items.map((p) => p.slug)).toEqual([
+		expect(total).toBe(12);
+		expect(items).toHaveLength(12);
+		expect(items.map((p) => p.slug).slice(0, 5)).toEqual([
 			'observability-is-a-contract',
 			'shape-of-a-useful-queue',
 			'when-latency-becomes-a-product-decision',
@@ -18,7 +18,7 @@ describe('getPosts', () => {
 
 	it('honors offset and limit', async () => {
 		const { total, items } = await mockApi.getPosts({ offset: 1, limit: 2 });
-		expect(total).toBe(5);
+		expect(total).toBe(12);
 		expect(items.map((p) => p.slug)).toEqual([
 			'shape-of-a-useful-queue',
 			'when-latency-becomes-a-product-decision'
