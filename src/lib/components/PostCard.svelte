@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { ArrowRight, ArrowUpRight } from 'lucide-svelte';
 	import type { PostSummary } from '#lib/api/index.ts';
 
 	interface Props {
@@ -17,54 +16,23 @@
 
 <a
 	href="/posts/{post.slug}"
-	class="group flex items-center gap-4 border-t border-border py-4 transition-colors hover:bg-accent/40
-		sm:grid sm:grid-cols-12 sm:gap-6 sm:py-6"
+	class="group flex items-center gap-4 border-t border-border py-5 transition-colors hover:bg-accent/40 sm:gap-6 sm:py-6"
 >
-	<!-- Desktop: meta as the leading grid column -->
-	<div class="col-span-2 hidden flex-col gap-1 text-sm text-muted-foreground sm:flex">
-		<time datetime={post.date}>{dateFormatter.format(new Date(post.date))}</time>
-		<span>{post.readTime} min read</span>
+	<div class="flex min-w-0 flex-1 flex-col gap-1.5 sm:max-w-2xl">
+		<h2 class="text-lg font-medium tracking-tight text-foreground sm:text-xl">
+			{post.title}
+		</h2>
+		<p class="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{post.preview}</p>
+		<p class="text-xs text-muted-foreground">
+			{dateFormatter.format(new Date(post.date))} · {post.readTime} min read
+		</p>
 	</div>
-
-	<!-- Desktop thumbnail column (absent when the post has none) -->
 	{#if post.thumbnail}
 		<img
 			src={post.thumbnail}
 			alt=""
 			loading="lazy"
-			class="col-span-2 hidden h-20 w-full rounded-md border border-border object-cover sm:block"
+			class="size-24 shrink-0 rounded-lg border border-border object-cover transition-transform group-hover:scale-[1.03] sm:size-32"
 		/>
 	{/if}
-
-	<div
-		class="col-span-9 flex min-w-0 flex-1 flex-col gap-1 sm:gap-2 {post.thumbnail
-			? 'sm:col-span-7'
-			: ''}"
-	>
-		{#if post.thumbnail}
-			<!-- Mobile thumbnail -->
-			<img
-				src={post.thumbnail}
-				alt=""
-				loading="lazy"
-				class="size-16 shrink-0 rounded-md border border-border object-cover sm:hidden"
-			/>
-		{/if}
-		<h2 class="text-lg font-medium tracking-tight text-foreground">{post.title}</h2>
-		<p class="line-clamp-2 text-sm leading-relaxed text-muted-foreground sm:line-clamp-none">
-			{post.preview}
-		</p>
-		<!-- Mobile: meta as one inline line under the preview -->
-		<p class="text-xs text-muted-foreground sm:hidden">
-			{dateFormatter.format(new Date(post.date))} · {post.readTime} min read
-		</p>
-	</div>
-
-	<div class="flex shrink-0 justify-end sm:col-span-1 sm:pt-1">
-		<ArrowRight class="size-4 text-muted-foreground sm:hidden" />
-		<ArrowUpRight
-			class="hidden size-5 text-muted-foreground transition-transform group-hover:translate-x-1
-				group-hover:-translate-y-1 sm:block"
-		/>
-	</div>
 </a>
