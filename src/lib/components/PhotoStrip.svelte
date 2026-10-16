@@ -13,13 +13,13 @@
 		<p class="text-sm font-medium text-muted-foreground">Photography</p>
 	</div>
 	<!-- Teaser: uniform fixed-height crops on a calm strip; the mixed-aspect masonry lives on /gallery. -->
-	<div class="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1">
+	<div class="scroll-slim flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
 		{#each photos as photo (photo.src)}
 			<img
 				src={photo.src}
 				alt={photo.alt}
 				loading="lazy"
-				class="h-28 w-40 shrink-0 snap-start rounded-md border border-border object-cover md:h-32 md:w-48"
+				class="h-40 w-56 shrink-0 snap-start rounded-md border border-border object-cover md:h-48 md:w-64"
 			/>
 		{/each}
 	</div>

@@ -11,7 +11,7 @@
 | Framework          | **Svelte 5 + SvelteKit** (TypeScript, Vite)                                                                        | Small bundle, great interactions (search palette), file-based routing, SSR                                              |
 | Fonts              | **Inter** (variable, self-hosted `@fontsource-variable/inter`) + **JetBrains Mono** (`@fontsource/jetbrains-mono`) | Closest free match to mockup grotesque; self-hosted = no external request/FOUT. Alts: Geist Sans, Atkinson Hyperlegible |
 | Rendering          | **SSR** via `adapter-node`                                                                                         | SEO (articles crawlable), server-side API fetch in load functions, fits K3s 256/512Mi backend container budget          |
-| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                          | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~3 exceptions, §7)                            |
+| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                          | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~4 exceptions, §7)                            |
 | Markdown           | **markdown-it** + `markdown-it-anchor` (+ tables/strikethrough/task-lists)                                         | Runtime content from API ⇒ mdsvex (build-time) is not applicable; token access powers TOC/anchors                       |
 | Sanitization       | **DOMPurify** (`isomorphic-dompurify`, server-side)                                                                | Mandatory — API content treated as untrusted                                                                            |
 | Code highlighting  | **Shiki, server-side**, dual-theme mode (`themes: { light, dark }`)                                                | VS Code-grade grammars; client ships plain highlighted HTML; theme flips via CSS vars without refetch                   |
@@ -127,7 +127,8 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
-3. Pill-zoom keyframes/transition for the search dialog.
+3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the future search dialog.
+4. Slim themed horizontal scrollbar (`.scroll-slim`) for the homepage photo strip — pseudo-elements aren't reachable via utilities.
 
 ## 8. Responsive matrix
 
