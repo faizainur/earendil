@@ -15,6 +15,9 @@
 		year: 'numeric'
 	});
 	let date = $derived(dateFormatter.format(new Date(data.post.date)));
+
+	// Non-interactive soft-fill pills — distinct from the site's bordered/hoverable buttons.
+	const chip = 'rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground';
 </script>
 
 <article class="grid grid-cols-12 gap-8">
@@ -26,9 +29,9 @@
 					<p>{data.post.readTime} min read</p>
 				</div>
 				{#if data.post.tags.length > 0}
-					<div class="grid gap-1 border-t border-border pt-4">
+					<div class="flex flex-wrap gap-1.5 border-t border-border pt-4">
 						{#each data.post.tags as tag (tag)}
-							<p>{tag}</p>
+							<span class={chip}>{tag}</span>
 						{/each}
 					</div>
 				{/if}
@@ -50,14 +53,15 @@
 				<span aria-hidden="true">/</span>
 				<span class="text-foreground">{data.post.title}</span>
 			</nav>
-			<div class="mb-4 flex items-center gap-2 text-sm text-muted-foreground lg:hidden">
+			<div
+				class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-muted-foreground lg:hidden"
+			>
 				<span>{date}</span>
 				<span aria-hidden="true">·</span>
 				<span>{data.post.readTime} min read</span>
-				{#if data.post.tags.length > 0}
-					<span aria-hidden="true">·</span>
-					<span>{data.post.tags.join(', ')}</span>
-				{/if}
+				{#each data.post.tags as tag (tag)}
+					<span class={chip}>{tag}</span>
+				{/each}
 			</div>
 			{#if data.toc.length > 0}
 				<div class="mb-4 lg:hidden">
