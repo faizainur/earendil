@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ImageLightbox from './ImageLightbox.svelte';
 	import type { LightboxImage } from './ImageLightbox.svelte';
+	import SectionLabel from './SectionLabel.svelte';
 	import type { Photo } from '#lib/api/index.ts';
 
 	interface Props {
@@ -13,9 +14,7 @@
 </script>
 
 <section class="flex flex-col gap-6">
-	<div class="border-t border-border pt-4">
-		<p class="text-sm font-medium text-muted-foreground">Photography</p>
-	</div>
+	<SectionLabel title="Photography" />
 	<!-- CSS-columns masonry: mixed aspect ratios never force rows to align (Pinterest-style). -->
 	<div class="columns-2 gap-4 md:columns-3">
 		{#each photos as photo (photo.src)}

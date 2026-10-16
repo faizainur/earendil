@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SectionLabel from './SectionLabel.svelte';
 	import type { Photo } from '#lib/api/index.ts';
 
 	interface Props {
@@ -9,9 +10,7 @@
 </script>
 
 <section id="photography" class="mx-auto flex w-full max-w-3xl flex-col gap-6">
-	<div class="border-t border-border pt-4">
-		<p class="text-sm font-medium text-muted-foreground">Photography</p>
-	</div>
+	<SectionLabel title="Photography" />
 	<!-- Teaser: uniform fixed-height crops on a calm strip; the mixed-aspect masonry lives on /gallery. -->
 	<div class="scroll-slim flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
 		{#each photos as photo (photo.src)}

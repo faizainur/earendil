@@ -2,6 +2,7 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource/jetbrains-mono';
 @import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/fraunces/wonk-italic.css';
 @plugin '@tailwindcss/typography';
 
 /* Semantic color tokens, mirroring the Flowstep mockups (shadcn-style zinc palette). */
@@ -125,7 +126,21 @@
 	}
 }
 
+/* Entry choreography for the homepage sections — quiet staggered rise. */
+@keyframes fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+}
+.fade-up {
+	animation: fade-up 0.5s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.fade-up {
+		animation: none;
+	}
 	.route-progress,
 	.route-progress[data-phase='active'] {
 		transition: none;

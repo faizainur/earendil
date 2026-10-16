@@ -85,9 +85,10 @@
 				{#each links as link (link.href)}
 					<a
 						href={link.href}
-						class="text-sm transition-colors {isActive(link.href)
-							? 'font-medium text-foreground'
-							: 'text-muted-foreground hover:text-foreground'}"
+						class="relative text-sm transition-colors after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-brand after:transition-[width] after:duration-200
+							{isActive(link.href)
+							? 'font-medium text-foreground after:w-full'
+							: 'text-muted-foreground after:w-0 hover:text-foreground hover:after:w-full'}"
 						aria-current={isActive(link.href) ? 'page' : undefined}
 					>
 						{link.label}

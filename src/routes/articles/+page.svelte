@@ -14,8 +14,10 @@
 <section class="flex flex-col gap-6">
 	<div class="flex items-center justify-between border-t border-border pt-4">
 		{#if data.tag}
-			<p class="text-sm font-medium text-muted-foreground">
-				Articles tagged <span class="text-foreground">{data.tag}</span>
+			<p class="font-brand text-sm font-medium text-muted-foreground">
+				Articles tagged <span class="text-foreground">{data.tag}</span><span class="text-brand"
+					>;</span
+				>
 			</p>
 			<a
 				href="/articles"
@@ -24,7 +26,9 @@
 				Clear ×
 			</a>
 		{:else}
-			<p class="text-sm font-medium text-muted-foreground">All articles</p>
+			<p class="font-brand text-sm font-medium text-muted-foreground">
+				All articles<span class="text-brand">;</span>
+			</p>
 		{/if}
 	</div>
 	{#if data.posts.length === 0}

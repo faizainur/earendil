@@ -1,11 +1,19 @@
 import { mockApi } from './mock';
-import type { PhotoListResponse, PostDetail, PostListResponse, SuggestResponse } from './types';
+import type {
+	Photo,
+	PhotoListResponse,
+	PostDetail,
+	PostListResponse,
+	SuggestResponse
+} from './types';
 
 export interface BlogApi {
 	getPosts(opts?: { offset?: number; limit?: number; tag?: string }): Promise<PostListResponse>;
 	getPost(slug: string): Promise<PostDetail>;
 	suggestPosts(q: string, limit?: number): Promise<SuggestResponse>;
 	getPhotos(opts?: { limit?: number }): Promise<PhotoListResponse>;
+	/** The homepage hero photo — curation is the BE's call; null when unset. */
+	getFeaturedPhoto(): Promise<Photo | null>;
 }
 
 export class ApiError extends Error {
@@ -52,6 +60,13 @@ function createFetchApi(base: string): BlogApi {
 			if (opts?.limit !== undefined) params.set('limit', String(opts.limit));
 			const query = params.toString();
 			return get<PhotoListResponse>(`/api/photos${query ? `?${query}` : ''}`);
+		},
+		async getFeaturedPhoto() {
+			const res = await fetch(`${base}/api/photos/featured`);
+			if (res.status === 404) return null;
+			if (!res.ok)
+				throw new ApiError(res.status, `GET /api/photos/featured failed with status ${res.status}`);
+			return (await res.json()) as Photo;
 		}
 	};
 }

@@ -111,4 +111,11 @@ describe('getPhotos', () => {
 		expect(items).toHaveLength(6);
 		expect(total).toBeGreaterThan(6);
 	});
+
+	it('serves a featured photo with source and alt', async () => {
+		const featured = await mockApi.getFeaturedPhoto();
+		expect(featured).not.toBeNull();
+		expect(featured?.src).toMatch(/^https:\/\//);
+		expect(featured?.alt).not.toBe('');
+	});
 });

@@ -373,5 +373,14 @@ export const mockApi: BlogApi = {
 
 	async getPhotos({ limit = photos.length } = {}) {
 		return { total: photos.length, items: photos.slice(0, limit) };
+	},
+
+	async getFeaturedPhoto() {
+		return {
+			src: 'https://picsum.photos/seed/hero-ridgeline/900/1150',
+			alt: 'Ridgeline climbing above the clouds at dawn',
+			width: 900,
+			height: 1150
+		} satisfies Photo;
 	}
 };
