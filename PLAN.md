@@ -16,7 +16,7 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 6. Theme store: cookie-based (`+layout.server.ts` reads `theme` cookie → `data-theme` on `<html>`; `+layout.svelte` handles toggle → optimistic flip + cookie set; default = `prefers-color-scheme`).
 7. Build layout shell components (Tailwind utilities only):
    - `Navbar.svelte`: wordmark + nav + `SearchPill` (desktop) / icon button (mobile, same styling per §8 of DESIGN.md) + `ThemeToggle` (sun/moon).
-   - `Footer.svelte`: `© 2024 Felix` + GitHub/LinkedIn/RSS only.
+   - `Footer.svelte`: `© 2026 Faiz` + GitHub/LinkedIn/RSS only.
    - Page container: `mx-auto max-w-page px-4 md:px-6`.
 8. Placeholder `/` page to verify chrome.
 

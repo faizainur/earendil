@@ -15,7 +15,7 @@
 	class="fade-up mx-auto grid w-full max-w-3xl items-center gap-8 md:grid-cols-[minmax(0,1fr)_240px]"
 >
 	<div class="flex flex-col gap-6">
-		<p class="text-sm font-medium tracking-wide text-primary">Hello, I&rsquo;m Felix.</p>
+		<p class="text-sm font-medium tracking-wide text-primary">Hello, I&rsquo;m Faiz.</p>
 		<h1 class="font-brand text-5xl leading-[1.05] font-semibold tracking-tight md:text-6xl">
 			I write about systems that keep <em class="italic">working</em> under pressure<span
 				class="text-brand">;</span

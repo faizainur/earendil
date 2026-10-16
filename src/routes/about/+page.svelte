@@ -1,7 +1,7 @@
 <section class="fade-up flex flex-col gap-6">
 	<p class="text-sm font-medium tracking-wide text-primary">About</p>
 	<h1 class="max-w-3xl text-4xl leading-tight font-semibold tracking-tight md:text-5xl">
-		Felix — backend engineer &amp; occasional photographer.
+		Faiz — backend engineer &amp; occasional photographer.
 	</h1>
 	<p class="max-w-2xl text-lg leading-relaxed text-muted-foreground">
 		I write about distributed systems, high-throughput applications, and the quiet details behind
