@@ -14,6 +14,8 @@
 	--muted-foreground: #71717a;
 	--accent: #f4f4f5;
 	--border: #e4e4e7;
+	/* Brand accent — the semicolon in the wordmark, nothing else. */
+	--brand: #7c3aed;
 }
 
 [data-theme='dark'] {
@@ -25,6 +27,7 @@
 	--muted-foreground: #a1a1aa;
 	--accent: #27272a;
 	--border: #27272a;
+	--brand: #a78bfa;
 }
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -44,6 +47,7 @@
 	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
 	--color-border: var(--border);
+	--color-brand: var(--brand);
 }
 
 @layer base {
@@ -76,6 +80,33 @@
 .scroll-slim::-webkit-scrollbar-thumb:hover,
 .prose pre::-webkit-scrollbar-thumb:hover {
 	background: var(--muted-foreground);
+}
+
+/* Theme switch: circular reveal of the new snapshot, growing from the navbar's
+   toggle corner. Skipped automatically for prefers-reduced-motion (view
+   transitions fall back to instant swap). */
+::view-transition-image-pair(root) {
+	isolation: isolate;
+}
+::view-transition-old(root) {
+	animation: none;
+}
+::view-transition-new(root) {
+	animation: theme-reveal 0.45s ease-in-out;
+}
+@keyframes theme-reveal {
+	from {
+		clip-path: circle(0 at min(calc(100% - 5rem), calc(50% + 32rem)) 2.4rem);
+	}
+	to {
+		clip-path: circle(160vmax at min(calc(100% - 5rem), calc(50% + 32rem)) 2.4rem);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-new(root) {
+		animation: none;
+	}
 }
 
 /* Dialog/lightbox entrance — shared pattern with the future search palette (DESIGN.md §5). */

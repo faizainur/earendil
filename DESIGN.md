@@ -9,9 +9,9 @@
 | Concern            | Choice                                                                                                                                                     | Rationale                                                                                                                                               |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Framework          | **Svelte 5 + SvelteKit** (TypeScript, Vite)                                                                                                                | Small bundle, great interactions (search palette), file-based routing, SSR                                                                              |
-| Fonts              | **Inter** (variable, self-hosted `@fontsource-variable/inter`) + **JetBrains Mono** (`@fontsource/jetbrains-mono`) + **Fraunces Variable** (wordmark only) | Sans matches the mockup grotesque; self-hosted = no external request/FOUT. Fraunces (SOFT/WONK axes) is the `fzr.` brand serif — never used for body/UI |
+| Fonts              | **Inter** (variable, self-hosted `@fontsource-variable/inter`) + **JetBrains Mono** (`@fontsource/jetbrains-mono`) + **Fraunces Variable** (wordmark only) | Sans matches the mockup grotesque; self-hosted = no external request/FOUT. Fraunces (SOFT/WONK axes) is the `fzr;` brand serif — never used for body/UI |
 | Rendering          | **SSR** via `adapter-node`                                                                                                                                 | SEO (articles crawlable), server-side API fetch in load functions, fits K3s 256/512Mi backend container budget                                          |
-| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                                                                  | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~4 exceptions, §7)                                                            |
+| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                                                                  | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~5 exceptions, §7)                                                            |
 | Markdown           | **markdown-it** + `markdown-it-anchor` (+ tables/strikethrough/task-lists)                                                                                 | Runtime content from API ⇒ mdsvex (build-time) is not applicable; token access powers TOC/anchors                                                       |
 | Sanitization       | **DOMPurify** (`isomorphic-dompurify`, server-side)                                                                                                        | Mandatory — API content treated as untrusted                                                                                                            |
 | Code highlighting  | **Shiki, server-side**, dual-theme mode (`themes: { light, dark }`)                                                                                        | VS Code-grade grammars; client ships plain highlighted HTML; theme flips via CSS vars without refetch                                                   |
@@ -32,11 +32,11 @@
 Layout shell (all pages):
 
 - **Container**: centered `max-w-page` (1120px) with generous equal side margins; content never stretches to full viewport. Mobile: `px-4`/`px-6` gutters.
-- **Navbar**: wordmark **`fzr.`** (Fraunces brand serif, `SOFT 40 / WONK 1`, two-tone: `fzr` foreground + muted period; serif is wordmark-only) + **4 links (Home · Articles · Gallery · About)** with pathname-derived active state (`aria-current="page"`) + **Search pill** + **Theme toggle**.
+- **Navbar**: wordmark **`fzr;`** (Fraunces brand serif, `SOFT 40 / WONK 1`: `fzr` foreground + **violet semicolon** `--brand` — the accent is reserved to the punctuation, nothing else; serif is wordmark-only) + **4 links (Home · Articles · Gallery · About)** with pathname-derived active state (`aria-current="page"`) + **Search pill** + **Theme toggle**.
 - **Mobile nav**: links collapse into a **hamburger** (`md:hidden`); icon button toggles a dropdown panel under the header with stacked links; closes on link click, `Esc`, outside tap, and on navigation; `aria-expanded`/`aria-controls`.
 - **Search pill (desktop)**: bordered rounded pill, magnifier icon, label "Search", visible `Mod+K` kbd hint.
 - **Search (mobile)**: compact bordered **rounded-square icon-only button** (magnifier only; no label, no kbd hint). Pill hidden on mobile; icon button hidden on desktop. Icon button + theme toggle fit on one mobile header row, ≥44px touch targets.
-- **Theme toggle**: bordered rounded button beside search; **sun icon in light state, moon icon in dark state**.
+- **Theme toggle**: bordered rounded button beside search; **sun icon in light state, moon icon in dark state**. Switching animates via the View Transitions API: the new palette reveals in a circle growing from the toggle's corner (450ms; instant where unsupported or reduced-motion).
 - **Footer**: `© 2024 Felix` + **only** GitHub, LinkedIn, RSS hyperlinks (no Elsewhere, no status sentence). Single row on desktop; wraps/stacks on mobile (`flex-wrap gap`).
 
 Article page zones (desktop ≥ lg): left **metadata rail** (date, read time, tags) | **main column** (readable width) | right **sticky TOC rail**. Mobile: single column, stacked — title → meta → inline TOC → body; sticky rail hidden.
@@ -129,7 +129,8 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
 3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the future search dialog.
-4. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — photo strip and overflowing code blocks; pseudo-elements aren't reachable via utilities.
+4. Theme-switch circular reveal — `::view-transition-*(root)` + `theme-reveal` keyframes (View Transitions API; pseudo-elements not reachable via utilities).
+5. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — photo strip and overflowing code blocks; pseudo-elements aren't reachable via utilities.
 
 ## 8. Responsive matrix
 

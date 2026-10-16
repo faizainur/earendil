@@ -13,9 +13,14 @@
 
 	function toggleTheme() {
 		const next = theme === 'dark' ? 'light' : 'dark';
-		theme = next;
-		document.documentElement.dataset.theme = next;
-		document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
+		const apply = () => {
+			theme = next;
+			document.documentElement.dataset.theme = next;
+			document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
+		};
+		// Circular reveal of the new palette (see theme-reveal in layout.css); instant where unsupported.
+		if (document.startViewTransition) document.startViewTransition(apply);
+		else apply();
 	}
 </script>
 

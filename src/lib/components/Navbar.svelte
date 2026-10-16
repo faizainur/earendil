@@ -43,11 +43,11 @@
 	<div class="mx-auto flex w-full max-w-page items-center justify-between px-5 py-4">
 		<a
 			href="/"
-			class="font-brand text-lg leading-none font-semibold tracking-tight"
+			class="font-brand text-3xl leading-none font-semibold tracking-tight"
 			style="font-variation-settings: 'SOFT' 40, 'WONK' 1"
-			aria-label="fzr. — home"
+			aria-label="fzr; — home"
 		>
-			fzr<span class="text-muted-foreground">.</span></a
+			fzr<span class="pl-1 text-brand">;</span></a
 		>
 		<div class="flex items-center gap-2 md:gap-8">
 			<!-- Desktop: inline links -->
