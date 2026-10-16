@@ -26,7 +26,7 @@
 </script>
 
 <article class="grid grid-cols-12 gap-8">
-	<aside class="col-span-9 grid grid-cols-12 gap-6">
+	<aside class="col-span-12 grid grid-cols-12 gap-6 lg:col-span-9">
 		<div class="hidden pt-2 lg:col-span-2 lg:block">
 			<div class="sticky top-6 text-xs text-muted-foreground">
 				<div class="mb-6">
