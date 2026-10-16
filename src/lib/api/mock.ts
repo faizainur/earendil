@@ -136,6 +136,14 @@ The teams that treat sampling as configuration eventually treat it as roadmap.
 
 A well-sampled trace turns "something is slow" into "the payments span held a connection for 900ms" — the difference between an afternoon of guessing and an afternoon of fixing.
 
+::: grid
+![Alpine ridgeline at dawn](https://picsum.photos/seed/alpine-dawn/800/520)
+![Rainy crosswalk under neon](https://picsum.photos/seed/rainy-crosswalk/520/760)
+![Fog rolling over a coastline](https://picsum.photos/seed/coast-fog/720/720)
+![Desert highway panorama](https://picsum.photos/seed/desert-panorama/1100/460)
+![Empty metro platform at night](https://picsum.photos/seed/metro-platform/540/800)
+:::
+
 ## Metrics and the cardinality budget
 
 Every label on a metric is a multiplier on storage, query cost, and the chance you ship a panic.

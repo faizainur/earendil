@@ -134,6 +134,17 @@
 	border: 1px solid var(--border);
 	border-radius: 8px;
 }
+/* ::: grid — masonry: images flow in columns, each on its own tidy gap. */
+.prose .article-grid {
+	margin: 1.5rem 0;
+}
+.prose .article-grid p {
+	margin: 0 0 0.75rem;
+}
+.prose .article-grid img {
+	width: 100%;
+	break-inside: avoid;
+}
 /* Tables: rounded soft header band, hairline row separators, row hover.
    (typography draws table borders via box-shadow — reset it first) */
 .prose table {

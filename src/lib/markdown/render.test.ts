@@ -101,3 +101,19 @@ describe('renderMarkdown — sanitization', () => {
 		expect(html).toContain('&lt;script&gt;');
 	});
 });
+
+describe('renderMarkdown — ::: grid container', () => {
+	it('wraps contained images in the masonry grid div', async () => {
+		const { html } = await renderMarkdown(
+			'::: grid\n![a](https://example.com/a.jpg)\n![b](https://example.com/b.jpg)\n:::\n'
+		);
+		expect(html).toContain('<div class="article-grid columns-2 gap-3 md:columns-3">');
+		expect(html.match(/<img/g)).toHaveLength(2);
+	});
+
+	it('leaves unknown directives as plain text', async () => {
+		const { html } = await renderMarkdown('::: nonsense\nhello\n:::\n');
+		expect(html).not.toContain('article-grid');
+		expect(html).toContain('::: nonsense');
+	});
+});

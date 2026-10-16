@@ -30,8 +30,8 @@
 		<div class="hidden pt-2 lg:col-span-2 lg:block">
 			<div class="sticky top-6 text-xs text-muted-foreground">
 				<div class="mb-6">
-					<p class="mb-2">{date}</p>
-					<p>{data.post.readTime} min read</p>
+					<p class="text-m mb-2">{date}</p>
+					<p class="text-s">{data.post.readTime} min read</p>
 				</div>
 				{#if data.post.tags.length > 0}
 					<div class="flex flex-wrap gap-1.5 border-t border-border pt-4">

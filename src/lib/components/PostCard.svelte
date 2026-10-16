@@ -16,7 +16,7 @@
 
 <a
 	href="/posts/{post.slug}"
-	class="group flex items-center gap-4 border-t border-border py-5 transition-colors hover:bg-accent/40 sm:gap-6 sm:py-6"
+	class="group flex items-center gap-4 border-t border-border px-5 py-5 transition-colors hover:bg-accent/40 sm:gap-6 sm:px-6 sm:py-6"
 >
 	<div class="flex min-w-0 flex-1 flex-col gap-1.5">
 		<h2 class="text-lg font-medium tracking-tight text-foreground sm:text-xl">
