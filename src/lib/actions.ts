@@ -18,17 +18,17 @@ export function headingAnchors(node: HTMLElement) {
 	for (const heading of Array.from(node.querySelectorAll<HTMLElement>('h2[id], h3[id]'))) {
 		const button = document.createElement('a');
 		button.href = `#${heading.id}`;
-		button.textContent = '#';
+		button.innerHTML = LINK_ICON;
 		button.setAttribute('aria-label', `Copy link to section: ${heading.textContent ?? ''}`);
 		button.className =
-			'heading-anchor absolute -left-5 top-0 flex size-5 items-center justify-center rounded text-sm font-medium text-muted-foreground opacity-0 transition-opacity duration-100 ease-out hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100';
+			'heading-anchor absolute -left-5 top-0 flex size-6 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity duration-100 ease-out hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100';
 		button.addEventListener('click', (e) => {
 			e.preventDefault();
 			const url = `${location.origin}${location.pathname}#${heading.id}`;
 			navigator.clipboard.writeText(url).then(
 				() => {
-					button.innerHTML = CHECK_ICON;
-					setTimeout(() => (button.textContent = '#'), 2000);
+					button.innerHTML = CHECK_ICON_MD;
+					setTimeout(() => (button.innerHTML = LINK_ICON), 2000);
 				},
 				() => {
 					/* clipboard rejected — leave idle */
@@ -51,14 +51,20 @@ export function headingAnchors(node: HTMLElement) {
 const pill =
 	'flex size-7 items-center justify-center rounded-full border border-border bg-background/80 backdrop-blur transition-colors hover:text-foreground';
 
-const svg = (inner: string) =>
-	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true">${inner}</svg>`;
+const svg = (inner: string, size = 'size-3.5') =>
+	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${size}" aria-hidden="true">${inner}</svg>`;
 
 // Lucide icon paths (same set the rest of the site renders via lucide-svelte).
 const COPY_ICON = svg(
 	'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'
 );
-const CHECK_ICON = svg('<path d="M20 6 9 17l-5-5"/>');
+const CHECK_PATH = '<path d="M20 6 9 17l-5-5"/>';
+const CHECK_ICON = svg(CHECK_PATH);
+const CHECK_ICON_MD = svg(CHECK_PATH, 'size-[18px]');
+const LINK_ICON = svg(
+	'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+	'size-[18px]'
+);
 const WRAP_ICON = svg(
 	'<path d="m16 16-3 3 3 3"/><path d="M3 12h14.5a1 1 0 0 1 0 7H13"/><path d="M3 19h6"/><path d="M3 5h18"/>'
 );
