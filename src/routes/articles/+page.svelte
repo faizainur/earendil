@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PostCard from '#lib/components/PostCard.svelte';
+	import ArticleCard from '#lib/components/ArticleCard.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -13,9 +13,9 @@
 	<div class="border-t border-border pt-4">
 		<p class="text-sm font-medium text-muted-foreground">All articles</p>
 	</div>
-	<div>
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		{#each data.posts as post (post.slug)}
-			<PostCard {post} />
+			<ArticleCard {post} />
 		{/each}
 	</div>
 
