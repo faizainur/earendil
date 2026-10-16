@@ -134,17 +134,19 @@
 	border: 1px solid var(--border);
 	border-radius: 8px;
 }
-/* ::: grid — tidy uniform tiles: aligned rows, consistent 4:3 crops. */
+/* ::: grid — Pinterest-style masonry: natural aspect ratios, staggered rows.
+   The paragraph wrapper is the unit — it must never split across columns, and
+   vertical + horizontal gutters are the same size (16px) for the packed look. */
 .prose .article-grid {
 	margin: 1.5rem 0;
+	column-gap: 1rem;
 }
 .prose .article-grid p {
-	margin: 0;
+	margin: 0 0 1rem;
+	break-inside: avoid;
 }
 .prose .article-grid img {
-	aspect-ratio: 4 / 3;
 	width: 100%;
-	object-fit: cover;
 }
 /* Tables: rounded soft header band, hairline row separators, row hover.
    (typography draws table borders via box-shadow — reset it first) */

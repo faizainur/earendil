@@ -107,7 +107,7 @@ describe('renderMarkdown — ::: grid container', () => {
 		const { html } = await renderMarkdown(
 			'::: grid\n![a](https://example.com/a.jpg)\n![b](https://example.com/b.jpg)\n:::\n'
 		);
-		expect(html).toContain('<div class="article-grid grid grid-cols-2 gap-3 md:grid-cols-3">');
+		expect(html).toContain('<div class="article-grid columns-2 md:columns-3">');
 		expect(html.match(/<img/g)).toHaveLength(2);
 	});
 

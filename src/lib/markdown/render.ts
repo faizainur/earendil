@@ -43,9 +43,7 @@ md.use(taskLists);
  */
 md.use(container, 'grid', {
 	render: (tokens, idx) =>
-		tokens[idx].nesting === 1
-			? '<div class="article-grid grid grid-cols-2 gap-3 md:grid-cols-3">\n'
-			: '</div>\n'
+		tokens[idx].nesting === 1 ? '<div class="article-grid columns-2 md:columns-3">\n' : '</div>\n'
 });
 
 /** Lazily build the Shiki-ready engine once per process (grammar loading is the slow part). */

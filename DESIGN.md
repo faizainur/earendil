@@ -115,7 +115,7 @@ Rules:
 
 ## 6. Markdown Rendering Pipeline (server-side, in `+page.server.ts`)
 
-1. **Parse**: markdown-it + anchor plugin (heading slugs) + tables, strikethrough, task lists. **Authoring directives**: `::: grid … :::` → tidy uniform image tiles (`grid` 2/3 cols, 4:3 crops, aligned rows); unknown `:::name` blocks stay plain text, so content degrades gracefully.
+1. **Parse**: markdown-it + anchor plugin (heading slugs) + tables, strikethrough, task lists. **Authoring directives**: `::: grid … :::` → Pinterest-style masonry (`columns-2 md:columns-3`, natural aspect ratios, uniform gutters, items never split across columns); unknown `:::name` blocks stay plain text, so content degrades gracefully.
 2. **Highlight**: Shiki fence override, `themes: { light, dark }` dual mode → CSS-variable spans.
 3. **Sanitize**: DOMPurify (jsdom) before serialization — always, regardless of source.
 4. **TOC extraction**: from markdown-it tokens (h2/h3 + anchor ids) → JSON. FE renders both the inline TOC under the title and the right sticky rail. This is a **rendering step, not data post-processing** — derived while parsing the article Markdown, like highlighting; the BE does not send a TOC field.
