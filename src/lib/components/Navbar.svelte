@@ -41,7 +41,14 @@
 
 <header class="relative border-b border-border">
 	<div class="mx-auto flex w-full max-w-page items-center justify-between px-5 py-4">
-		<a href="/" class="text-sm font-semibold tracking-tight">F&#x2022;&#x2022;&#x2022;</a>
+		<a
+			href="/"
+			class="font-brand text-lg leading-none font-semibold tracking-tight"
+			style="font-variation-settings: 'SOFT' 40, 'WONK' 1"
+			aria-label="fzr. — home"
+		>
+			fzr<span class="text-muted-foreground">.</span></a
+		>
 		<div class="flex items-center gap-2 md:gap-8">
 			<!-- Desktop: inline links -->
 			<nav class="hidden items-center gap-6 md:flex" aria-label="Main navigation">

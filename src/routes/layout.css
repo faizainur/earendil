@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
 @import '@fontsource/jetbrains-mono';
+@import '@fontsource-variable/fraunces';
 @plugin '@tailwindcss/typography';
 
 /* Semantic color tokens, mirroring the Flowstep mockups (shadcn-style zinc palette). */
@@ -32,6 +33,8 @@
 	--container-page: 1120px;
 	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+	/* Display serif for the wordmark only — never for body/UI text. */
+	--font-brand: 'Fraunces Variable', ui-serif, Georgia, 'Times New Roman', serif;
 
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);

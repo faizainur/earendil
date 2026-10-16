@@ -13,7 +13,7 @@
 <!-- Hero: text left, mountain line-art visual on the right (hidden below md) -->
 <section class="mx-auto grid w-full max-w-3xl items-center gap-8 md:grid-cols-[minmax(0,1fr)_auto]">
 	<div class="flex flex-col gap-6">
-		<p class="text-sm font-medium tracking-wide text-primary">Hello, I&rsquo;m Felix.</p>
+		<p class="text-sm font-medium tracking-wide text-primary">Hello, I&rsquo;m Faiz Ainur Rofiq.</p>
 		<h1 class="text-4xl leading-tight font-semibold tracking-tight md:text-5xl">
 			I write about systems that keep working under pressure.
 		</h1>
