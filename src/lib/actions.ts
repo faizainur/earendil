@@ -4,22 +4,38 @@
  */
 
 const pill =
-	'rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium backdrop-blur transition-colors hover:text-foreground';
+	'flex size-7 items-center justify-center rounded-full border border-border bg-background/80 backdrop-blur transition-colors hover:text-foreground';
+
+const svg = (inner: string) =>
+	`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5" aria-hidden="true">${inner}</svg>`;
+
+// Lucide icon paths (same set the rest of the site renders via lucide-svelte).
+const COPY_ICON = svg(
+	'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'
+);
+const CHECK_ICON = svg('<path d="M20 6 9 17l-5-5"/>');
+const WRAP_ICON = svg(
+	'<path d="m16 16-3 3 3 3"/><path d="M3 12h14.5a1 1 0 0 1 0 7H13"/><path d="M3 19h6"/><path d="M3 5h18"/>'
+);
 
 /**
- * Adds a small toolbar (Wrap | Copy) to every `<pre>`. The Copy button is only
- * mounted when the async clipboard is available; wrapping works regardless.
+ * Adds an icon toolbar (Wrap | Copy, Lucide glyphs) to every `<pre>`, hidden until
+ * the block is hovered or keyboard-focused (always visible on touch devices, see
+ * layout.css). The Copy button is only mounted when the async clipboard is
+ * available; wrapping works regardless.
  */
 export function codeBlockTools(node: HTMLElement) {
 	const toolbars: HTMLDivElement[] = [];
 
 	for (const pre of Array.from(node.querySelectorAll('pre'))) {
 		const toolbar = document.createElement('div');
-		toolbar.className = 'absolute top-2 right-2 flex gap-2';
+		toolbar.className =
+			'code-tools absolute top-2 right-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100';
 
 		const wrap = document.createElement('button');
 		wrap.type = 'button';
-		wrap.textContent = 'Wrap';
+		wrap.innerHTML = WRAP_ICON;
+		wrap.title = 'Toggle line wrapping';
 		wrap.setAttribute('aria-pressed', 'false');
 		wrap.setAttribute('aria-label', 'Toggle line wrapping for this code block');
 		wrap.className = `${pill} text-muted-foreground`;
@@ -34,14 +50,15 @@ export function codeBlockTools(node: HTMLElement) {
 		if (navigator.clipboard) {
 			const copy = document.createElement('button');
 			copy.type = 'button';
-			copy.textContent = 'Copy';
+			copy.innerHTML = COPY_ICON;
+			copy.title = 'Copy code';
 			copy.setAttribute('aria-label', 'Copy code to clipboard');
 			copy.className = `${pill} text-muted-foreground`;
 			copy.addEventListener('click', () => {
 				navigator.clipboard.writeText(pre.textContent ?? '').then(
 					() => {
-						copy.textContent = 'Copied!';
-						setTimeout(() => (copy.textContent = 'Copy'), 2000);
+						copy.innerHTML = CHECK_ICON;
+						setTimeout(() => (copy.innerHTML = COPY_ICON), 2000);
 					},
 					() => {
 						/* clipboard rejected (e.g. insecure context) — leave the button idle */
@@ -51,7 +68,7 @@ export function codeBlockTools(node: HTMLElement) {
 			toolbar.appendChild(copy);
 		}
 
-		pre.classList.add('relative');
+		pre.classList.add('relative', 'group');
 		pre.appendChild(toolbar);
 		toolbars.push(toolbar);
 	}

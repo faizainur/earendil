@@ -119,7 +119,7 @@ Rules:
 3. **Sanitize**: DOMPurify (jsdom) before serialization — always, regardless of source.
 4. **TOC extraction**: from markdown-it tokens (h2/h3 + anchor ids) → JSON. FE renders both the inline TOC under the title and the right sticky rail. This is a **rendering step, not data post-processing** — derived while parsing the article Markdown, like highlighting; the BE does not send a TOC field.
 5. Render via `{@html}` inside `.prose`.
-6. **Post-render enhancement** (Svelte action on the container): **Wrap | Copy toolbar** on `<pre>` blocks (wrap toggles `white-space: pre-wrap` via `.code-wrap`; Copy requires async clipboard), `loading="lazy"` on `<img>`, IntersectionObserver for active-TOC-entry highlighting.
+6. **Post-render enhancement** (Svelte action on the container): **Wrap | Copy icon toolbar** (Lucide glyphs) on `<pre>` blocks, hidden until hover/keyboard focus (always visible on touch); wrap toggles `white-space: pre-wrap` via `.code-wrap`; Copy requires async clipboard. `loading="lazy"` on `<img>`, IntersectionObserver for active-TOC-entry highlighting.
 
 Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript, typescript, python, bash, yaml, json, dockerfile, hcl`. (K8s manifests = `yaml`; Terraform = `hcl`; all bundled grammars, no external loads.) ~11 grammars keeps server cold-start light.
 

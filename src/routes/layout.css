@@ -138,6 +138,12 @@
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
+/* Touch devices have no hover — keep the code toolbar always revealed there. */
+@media (hover: none) {
+	.prose .code-tools {
+		opacity: 1;
+	}
+}
 
 @media (prefers-reduced-motion: reduce) {
 	.dialog-zoom {
