@@ -21,7 +21,7 @@ export function headingAnchors(node: HTMLElement) {
 		button.innerHTML = LINK_ICON;
 		button.setAttribute('aria-label', `Copy link to section: ${heading.textContent ?? ''}`);
 		button.className =
-			'heading-anchor absolute -left-5 top-0 flex size-6 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity duration-100 ease-out hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100';
+			'heading-anchor absolute -left-8 top-1/2 hidden size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity duration-100 ease-out hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 lg:flex';
 		button.addEventListener('click', (e) => {
 			e.preventDefault();
 			const url = `${location.origin}${location.pathname}#${heading.id}`;

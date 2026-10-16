@@ -139,10 +139,14 @@
 	overflow-wrap: anywhere;
 }
 /* Touch devices have no hover — keep the code toolbar + heading anchors always revealed there. */
+/* Touch devices have no hover — keep the code toolbar revealed; heading anchors
+   live in the left margin (negative offset) and would overflow small screens. */
 @media (hover: none) {
-	.prose .code-tools,
-	.prose .heading-anchor {
+	.prose .code-tools {
 		opacity: 1;
+	}
+	.prose .heading-anchor {
+		display: none;
 	}
 }
 
