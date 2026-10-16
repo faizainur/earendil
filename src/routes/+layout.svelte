@@ -1,5 +1,6 @@
 <script lang="ts">
 	import './layout.css';
+	import { navigating } from '$app/state';
 	import favicon from '#lib/assets/favicon.svg';
 	import Navbar from '#lib/components/Navbar.svelte';
 	import Footer from '#lib/components/Footer.svelte';
@@ -10,6 +11,17 @@
 	// Intentionally seed from the server-rendered cookie value; client toggles own the state afterwards.
 	// svelte-ignore state_referenced_locally
 	let theme = $state(data.theme);
+
+	// $app/state's `navigating` is always an object with null fields when idle; the
+	// truthy gate is `to`. Hash-only jumps (TOC links) load nothing — don't flash.
+	const navLoading = $derived(
+		navigating.to !== null &&
+			!(
+				navigating.from !== null &&
+				navigating.to.url.pathname === navigating.from.url.pathname &&
+				navigating.to.url.hash !== ''
+			)
+	);
 
 	function toggleTheme() {
 		const next = theme === 'dark' ? 'light' : 'dark';
@@ -32,6 +44,7 @@
 </svelte:head>
 
 <div class="flex min-h-svh flex-col bg-background text-foreground">
+	<div class="route-progress" data-phase={navLoading ? 'active' : 'idle'} aria-hidden="true"></div>
 	<Navbar {theme} onToggle={toggleTheme} />
 	<div class="mx-auto flex w-full max-w-page grow flex-col gap-12 px-5 py-12 md:px-8">
 		<main class="flex flex-1 flex-col gap-12">
