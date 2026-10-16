@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { codeBlockTools, headingAnchors, tocSpy } from '#lib/actions.ts';
+	import { codeBlockTools, headingAnchors, tocSpy, zoomableImages } from '#lib/actions.ts';
 	import ArticleTOC from '#lib/components/ArticleTOC.svelte';
+	import ImageLightbox from '#lib/components/ImageLightbox.svelte';
+	import type { LightboxImage } from '#lib/components/ImageLightbox.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -8,6 +10,8 @@
 	}
 
 	let { data }: Props = $props();
+
+	let zoomed = $state<LightboxImage | null>(null);
 
 	const dateFormatter = new Intl.DateTimeFormat('en-US', {
 		month: 'short',
@@ -54,6 +58,13 @@
 				<span aria-hidden="true">/</span>
 				<span class="text-foreground">{data.post.title}</span>
 			</nav>
+			{#if data.post.thumbnail}
+				<img
+					src={data.post.thumbnail}
+					alt={data.post.title}
+					class="mt-2 mb-6 max-h-[60vh] w-full rounded-lg border border-border object-contain"
+				/>
+			{/if}
 			<div
 				class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-muted-foreground lg:hidden"
 			>
@@ -76,6 +87,7 @@
 				use:codeBlockTools
 				use:tocSpy
 				use:headingAnchors
+				use:zoomableImages={(image) => (zoomed = image)}
 			>
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -- HTML is DOMPurify-sanitized in the server Markdown pipeline -->
 				{@html data.html}
@@ -91,3 +103,7 @@
 		</aside>
 	{/if}
 </article>
+
+{#if zoomed}
+	<ImageLightbox image={zoomed} onclose={() => (zoomed = null)} />
+{/if}

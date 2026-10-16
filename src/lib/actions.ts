@@ -140,6 +140,28 @@ export function codeBlockTools(node: HTMLElement) {
 }
 
 /**
+ * Makes every `<img>` inside the container click-to-zoom: adds a zoom cursor
+ * and forwards `{ src, alt }` to the callback (the parent renders an ImageLightbox).
+ */
+export function zoomableImages(
+	node: HTMLElement,
+	onOpen: (image: { src: string; alt: string }) => void
+) {
+	const cleanups = Array.from(node.querySelectorAll('img')).map((img) => {
+		img.classList.add('cursor-zoom-in');
+		const handler = () => onOpen({ src: img.currentSrc || img.src, alt: img.alt });
+		img.addEventListener('click', handler);
+		return () => img.removeEventListener('click', handler);
+	});
+
+	return {
+		destroy() {
+			for (const cleanup of cleanups) cleanup();
+		}
+	};
+}
+
+/**
  * Watches the article's h2/h3 headings and flags the matching TOC links
  * (`a[data-toc-link]`, rendered by ArticleTOC) with `data-active` while their
  * section is in the upper part of the viewport.

@@ -132,6 +132,10 @@ tail-sample --latency-p99 1s --keep-slow --baseline 0.01
 
 The teams that treat sampling as configuration eventually treat it as roadmap.
 
+![Trace waterfall of a slow checkout request](https://picsum.photos/seed/trace-waterfall/1200/700)
+
+A well-sampled trace turns "something is slow" into "the payments span held a connection for 900ms" — the difference between an afternoon of guessing and an afternoon of fixing.
+
 ## Metrics and the cardinality budget
 
 Every label on a metric is a multiplier on storage, query cost, and the chance you ship a panic.

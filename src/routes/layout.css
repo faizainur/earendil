@@ -129,6 +129,51 @@
 .prose code::after {
 	content: none;
 }
+/* Inline article images match the site's framed-media language. */
+.prose img {
+	border: 1px solid var(--border);
+	border-radius: 8px;
+}
+/* Tables: rounded soft header band, hairline row separators, row hover.
+   (typography draws table borders via box-shadow — reset it first) */
+.prose table {
+	width: 100%;
+	font-size: 0.875rem;
+	line-height: 1.6;
+	border-collapse: collapse;
+}
+.prose thead th {
+	padding: 0.5rem 0.75rem;
+	background: var(--muted);
+	border: none;
+	border-bottom: 1px solid var(--border);
+	box-shadow: none;
+	color: var(--foreground);
+	font-weight: 500;
+	text-align: left;
+}
+.prose thead th:first-child {
+	border-top-left-radius: 8px;
+}
+.prose thead th:last-child {
+	border-top-right-radius: 8px;
+}
+.prose tbody td {
+	padding: 0.5rem 0.75rem;
+	border: none;
+	border-bottom: 1px solid var(--border);
+	box-shadow: none;
+	color: var(--foreground);
+}
+.prose tbody tr:last-child td {
+	border-bottom: none;
+}
+.prose tbody tr {
+	transition: background-color 120ms ease;
+}
+.prose tbody tr:hover td {
+	background: color-mix(in srgb, var(--muted) 45%, transparent);
+}
 .prose pre.shiki {
 	padding: 1rem;
 	border-radius: 8px;
