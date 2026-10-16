@@ -30,7 +30,9 @@ export function codeBlockTools(node: HTMLElement) {
 	for (const pre of Array.from(node.querySelectorAll('pre'))) {
 		const toolbar = document.createElement('div');
 		toolbar.className =
-			'code-tools absolute top-2 right-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100';
+			'code-tools absolute top-2 right-2 flex gap-2 opacity-0 ' +
+			'group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-150 ' +
+			'group-focus-within:opacity-100 group-focus-within:transition-opacity';
 
 		const wrap = document.createElement('button');
 		wrap.type = 'button';
@@ -39,11 +41,13 @@ export function codeBlockTools(node: HTMLElement) {
 		wrap.setAttribute('aria-pressed', 'false');
 		wrap.setAttribute('aria-label', 'Toggle line wrapping for this code block');
 		wrap.className = `${pill} text-muted-foreground`;
-		wrap.addEventListener('click', () => {
+		wrap.addEventListener('click', (e) => {
 			const on = pre.classList.toggle('code-wrap');
 			wrap.setAttribute('aria-pressed', String(on));
 			wrap.classList.toggle('text-foreground', on);
 			wrap.classList.toggle('text-muted-foreground', !on);
+			// Pointer click: drop focus so hover-out hides the toolbar instantly (keyboard keeps it).
+			if (e.detail > 0) wrap.blur();
 		});
 		toolbar.appendChild(wrap);
 
@@ -54,7 +58,7 @@ export function codeBlockTools(node: HTMLElement) {
 			copy.title = 'Copy code';
 			copy.setAttribute('aria-label', 'Copy code to clipboard');
 			copy.className = `${pill} text-muted-foreground`;
-			copy.addEventListener('click', () => {
+			copy.addEventListener('click', (e) => {
 				navigator.clipboard.writeText(pre.textContent ?? '').then(
 					() => {
 						copy.innerHTML = CHECK_ICON;
@@ -64,6 +68,7 @@ export function codeBlockTools(node: HTMLElement) {
 						/* clipboard rejected (e.g. insecure context) — leave the button idle */
 					}
 				);
+				if (e.detail > 0) copy.blur();
 			});
 			toolbar.appendChild(copy);
 		}
