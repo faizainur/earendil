@@ -81,6 +81,23 @@
 	animation: zoom-in 180ms ease-out;
 }
 
+/**
+ * Shiki dual-theme CSS-var mapping — raw-CSS exception #2 (DESIGN.md §7).
+ * Fences are highlighted server-side with `defaultColor: false`, so tokens
+ * carry only `--shiki-light`/`--shiki-dark` inline vars; these rules resolve
+ * them and flip with `data-theme` without a refetch.
+ */
+.shiki,
+.shiki span {
+	color: var(--shiki-light);
+	background: var(--shiki-light-bg);
+}
+[data-theme='dark'] .shiki,
+[data-theme='dark'] .shiki span {
+	color: var(--shiki-dark) !important;
+	background: var(--shiki-dark-bg) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.dialog-zoom {
 		animation: none;

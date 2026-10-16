@@ -24,7 +24,7 @@
 
 	// Close on navigation.
 	$effect(() => {
-		page.url.pathname;
+		void page.url.pathname;
 		open = false;
 	});
 
