@@ -5,4 +5,12 @@ export const api = createApi(PUBLIC_API_BASE);
 
 export type { BlogApi } from './client';
 export { ApiError } from './client';
-export type { PostSummary, PostDetail, PostListResponse, SuggestResponse } from './types';
+export type {
+	PostSummary,
+	PostDetail,
+	PostListResponse,
+	SuggestResponse,
+	Photo,
+	PhotoListResponse,
+	ContactInput
+} from './types';

@@ -13,6 +13,7 @@
 	--muted-foreground: #71717a;
 	--accent: #f4f4f5;
 	--border: #e4e4e7;
+	--destructive: #dc2626;
 }
 
 [data-theme='dark'] {
@@ -24,6 +25,7 @@
 	--muted-foreground: #a1a1aa;
 	--accent: #27272a;
 	--border: #27272a;
+	--destructive: #f87171;
 }
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -41,6 +43,7 @@
 	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
 	--color-border: var(--border);
+	--color-destructive: var(--destructive);
 }
 
 @layer base {

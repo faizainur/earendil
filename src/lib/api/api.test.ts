@@ -72,3 +72,36 @@ describe('suggestPosts', () => {
 		expect(results.length).toBeLessThanOrEqual(2);
 	});
 });
+
+describe('thumbnail handling', () => {
+	it('posts may carry null thumbnails', async () => {
+		const { items } = await mockApi.getPosts();
+		const withThumb = items.filter((p) => p.thumbnail !== null);
+		const withoutThumb = items.filter((p) => p.thumbnail === null);
+		expect(withThumb.length).toBeGreaterThan(0);
+		expect(withoutThumb.length).toBeGreaterThan(0);
+	});
+});
+
+describe('getPhotos', () => {
+	it('returns a non-empty list with consistent total', async () => {
+		const { total, items } = await mockApi.getPhotos();
+		expect(items.length).toBeGreaterThan(0);
+		expect(total).toBe(items.length);
+	});
+
+	it('each photo has dimensions and varied aspect ratios', async () => {
+		const { items } = await mockApi.getPhotos();
+		expect(items.every((p) => p.width > 0 && p.height > 0)).toBe(true);
+		const ratios = new Set(items.map((p) => (p.width / p.height).toFixed(2)));
+		expect(ratios.size).toBeGreaterThan(3);
+	});
+});
+
+describe('sendContact', () => {
+	it('accepts a complete payload', async () => {
+		await expect(
+			mockApi.sendContact({ name: 'A', email: 'a@b.c', message: 'hi' })
+		).resolves.toBeUndefined();
+	});
+});

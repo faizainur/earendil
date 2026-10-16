@@ -20,11 +20,11 @@
 
 ## 2. Pages & Layout
 
-| Route           | Content                                                                                                                                                                               | Screens             |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `/`             | Greeting, headline, "Selected writing" list (**BE-curated**; FE renders payload as-is, no sorting/derivation), minimal footer. **No hero search field** — search lives only in navbar | 1 (light), 5 (dark) |
-| `/posts/[slug]` | Title, metadata, inline TOC below title, body sections, quote, "Further reading". **No comments/Discussion section**                                                                  | 2 (light), 6 (dark) |
-| (future)        | About, RSS redirect to BE `/feed.xml`                                                                                                                                                 | —                   |
+| Route           | Content                                                                                                                                                                                                                                                                                                                         | Screens             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `/`             | Greeting + headline (decorative line-art SVG right on desktop), "Selected writing" list with optional thumbnails (**BE-curated**; FE renders payload as-is), "Photography" masonry grid (landscape/street shots, mixed aspect ratios), footer with contact form on home. **No hero search field** — search lives only in navbar | 1 (light), 5 (dark) |
+| `/posts/[slug]` | Title, metadata, inline TOC below title, body sections, quote, "Further reading". **No comments/Discussion section**                                                                                                                                                                                                            | 2 (light), 6 (dark) |
+| (future)        | About, RSS redirect to BE `/feed.xml`                                                                                                                                                                                                                                                                                           | —                   |
 
 Layout shell (all pages):
 
@@ -71,23 +71,22 @@ Article page zones (desktop ≥ lg): left **metadata rail** (date, read time, ta
 Content arrives at **runtime from the BE** (not build time). One typed client interface; mock vs real swapped by `PUBLIC_API_BASE` env — swapping to the real BE must require zero other FE changes.
 
 ```
-GET /api/posts?offset&limit
-  → { total, items: PostSummary[] }
-
-GET /api/posts/:slug
-  → { ...PostSummary, tags: string[], content: string /* raw Markdown */ }
-
-GET /api/search/suggest?q&limit
-  → { results: PostSummary[] }        // 1–2 line preview each
+GET /api/posts?offset&limit        → { total, items: PostSummary[] }
+GET /api/posts/:slug               → { ...PostSummary, tags, content }
+GET /api/search/suggest?q&limit    → { results: PostSummary[] }
+GET /api/photos                    → { total, items: Photo[] }        // homepage photography grid
+POST /api/contact                  → 204                               // { name, email, message }
 
 PostSummary = {
   slug: string
   title: string
-  preview: string                      // 1–2 lines
-  date: string                         // ISO
-  readTime: number                     // minutes
-  thumbnail: string                    // image URL
+  preview: string        // 1–2 lines
+  date: string           // ISO
+  readTime: number       // minutes
+  thumbnail: string | null   // null ⇒ list rows render title + preview only
 }
+
+Photo = { src, alt, width, height }   // natural dimensions; mixed aspect ratios on purpose
 ```
 
 Rules:
@@ -128,14 +127,16 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 ## 8. Responsive matrix
 
-| Area           | Mobile `< md`/`< lg`                                          | Desktop                            |
-| -------------- | ------------------------------------------------------------- | ---------------------------------- |
-| Container      | `px-4/6` gutters                                              | 1120px centered, generous margins  |
-| Navbar search  | icon-only rounded-square button                               | pill + label + `Mod+K` kbd         |
-| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden | meta rail / main / sticky TOC grid |
-| Search dialog  | `inset-x-3` sheet                                             | centered `max-w-xl` card           |
-| Home list      | stacked cards, smaller thumbnails                             | list rows                          |
-| Footer         | wraps/stacks                                                  | single constrained row             |
+| Area           | Mobile `< md`/`< lg`                                          | Desktop                                |
+| -------------- | ------------------------------------------------------------- | -------------------------------------- |
+| Container      | `px-4/6` gutters                                              | 1120px centered, generous margins      |
+| Navbar search  | icon-only rounded-square button                               | pill + label + `Mod+K` kbd             |
+| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden | meta rail / main / sticky TOC grid     |
+| Search dialog  | `inset-x-3` sheet                                             | centered `max-w-xl` card               |
+| Home list      | stacked rows, inline meta; thumbnail above title when present | 12-col rows; optional thumbnail column |
+| Photography    | 2-col masonry (`columns-2`)                                   | 3-col masonry (`md:columns-3`)         |
+| Footer         | contact form (home only) + wrapped bottom bar                 | contact form (home only) + one row     |
+| Footer         | wraps/stacks                                                  | single constrained row                 |
 
 Rules: consistent `md`/`lg` breakpoints; differences handled with visibility variants (`hidden md:flex` pill ↔ `md:hidden` icon button, `hidden lg:grid` rails), **never** duplicate mobile/desktop components except where markup genuinely differs. Touch targets ≥44px. QA against all 8 screens (light/dark automatic via tokens; desktop/mobile via variants).
 

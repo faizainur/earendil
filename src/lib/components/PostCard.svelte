@@ -26,7 +26,30 @@
 		<span>{post.readTime} min read</span>
 	</div>
 
-	<div class="col-span-9 flex min-w-0 flex-1 flex-col gap-1 sm:gap-2">
+	<!-- Desktop thumbnail column (absent when the post has none) -->
+	{#if post.thumbnail}
+		<img
+			src={post.thumbnail}
+			alt=""
+			loading="lazy"
+			class="col-span-2 hidden h-20 w-full rounded-md border border-border object-cover sm:block"
+		/>
+	{/if}
+
+	<div
+		class="col-span-9 flex min-w-0 flex-1 flex-col gap-1 sm:gap-2 {post.thumbnail
+			? 'sm:col-span-7'
+			: ''}"
+	>
+		{#if post.thumbnail}
+			<!-- Mobile thumbnail -->
+			<img
+				src={post.thumbnail}
+				alt=""
+				loading="lazy"
+				class="size-16 shrink-0 rounded-md border border-border object-cover sm:hidden"
+			/>
+		{/if}
 		<h2 class="text-lg font-medium tracking-tight text-foreground">{post.title}</h2>
 		<p class="line-clamp-2 text-sm leading-relaxed text-muted-foreground sm:line-clamp-none">
 			{post.preview}

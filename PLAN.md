@@ -44,7 +44,8 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 1. `routes/+page.server.ts`: SSR fetch curated "Selected writing" list from BE — **render payload as-is** (no FE sorting/limiting; curation is BE's job).
 2. `PostCard.svelte` / list rows: title, preview, date, read time (+ thumbnail treatment per design).
 3. Greeting + headline per mockup.
-4. Light/dark + responsive QA (stacked mobile cards).
+
+**Review pass (2026-10-16):** footer sticks to bottom on short pages (flex-grow main); optional post thumbnails in list (null ⇒ title + preview only); hero gains decorative SVG on the right (desktop); new "Photography" section — CSS-columns masonry for mixed aspect ratios (`GET /api/photos`); homepage footer gains a contact form (`POST /api/contact` via SvelteKit form action). 4. Light/dark + responsive QA (stacked mobile cards).
 
 **Verify:** view-source shows SSR'd content; matches Screens 1 & 5.
 

@@ -4,7 +4,27 @@ export interface PostSummary {
 	preview: string;
 	date: string;
 	readTime: number;
-	thumbnail: string;
+	/** Null when the post has no thumbnail — listings render title + preview only. */
+	thumbnail: string | null;
+}
+
+export interface Photo {
+	src: string;
+	alt: string;
+	/** Natural dimensions so the masonry grid can reserve layout. */
+	width: number;
+	height: number;
+}
+
+export interface PhotoListResponse {
+	total: number;
+	items: Photo[];
+}
+
+export interface ContactInput {
+	name: string;
+	email: string;
+	message: string;
 }
 
 export interface PostDetail extends PostSummary {

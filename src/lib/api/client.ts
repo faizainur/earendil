@@ -1,10 +1,18 @@
 import { mockApi } from './mock';
-import type { PostDetail, PostListResponse, SuggestResponse } from './types';
+import type {
+	ContactInput,
+	PhotoListResponse,
+	PostDetail,
+	PostListResponse,
+	SuggestResponse
+} from './types';
 
 export interface BlogApi {
 	getPosts(opts?: { offset?: number; limit?: number }): Promise<PostListResponse>;
 	getPost(slug: string): Promise<PostDetail>;
 	suggestPosts(q: string, limit?: number): Promise<SuggestResponse>;
+	getPhotos(): Promise<PhotoListResponse>;
+	sendContact(input: ContactInput): Promise<void>;
 }
 
 export class ApiError extends Error {
@@ -44,6 +52,18 @@ function createFetchApi(base: string): BlogApi {
 			const params = new URLSearchParams({ q });
 			if (limit !== undefined) params.set('limit', String(limit));
 			return get<SuggestResponse>(`/api/search/suggest?${params}`);
+		},
+		getPhotos() {
+			return get<PhotoListResponse>('/api/photos');
+		},
+		async sendContact(input) {
+			const res = await fetch(`${base}/api/contact`, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(input)
+			});
+			if (!res.ok)
+				throw new ApiError(res.status, `POST /api/contact failed with status ${res.status}`);
 		}
 	};
 }
