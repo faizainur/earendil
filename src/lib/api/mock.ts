@@ -138,13 +138,21 @@ A well-sampled trace turns "something is slow" into "the payments span held a co
 
 ::: grid
 ![Alpine ridgeline at dawn](https://picsum.photos/seed/alpine-dawn/800/520)
+
 ![Rainy crosswalk under neon](https://picsum.photos/seed/rainy-crosswalk/520/760)
+
 ![Fog rolling over a coastline](https://picsum.photos/seed/coast-fog/720/720)
+
 ![Desert highway panorama](https://picsum.photos/seed/desert-panorama/1100/460)
+
 ![Empty metro platform at night](https://picsum.photos/seed/metro-platform/540/800)
+
 ![Lakeside at dusk](https://picsum.photos/seed/lakeside-dusk/820/560)
+
 ![Narrow old-town alley](https://picsum.photos/seed/old-town-alley/560/880)
+
 ![Stream cutting through forest](https://picsum.photos/seed/forest-stream/780/600)
+
 ![Harbor terraces from above](https://picsum.photos/seed/harbor-terrace/640/860)
 :::
 
