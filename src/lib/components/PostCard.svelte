@@ -3,11 +3,9 @@
 
 	interface Props {
 		post: PostSummary;
-		/** 1-based curation position — rendered as a violet `01;` index. */
-		index?: number;
 	}
 
-	let { post, index }: Props = $props();
+	let { post }: Props = $props();
 
 	const dateFormatter = new Intl.DateTimeFormat('en-US', {
 		month: 'short',
@@ -23,9 +21,6 @@
 	<div class="flex min-w-0 flex-1 flex-col gap-1.5">
 		<!-- Meta first, like a masthead: mono is the developer voice. -->
 		<p class="font-mono text-xs text-muted-foreground">
-			{#if index !== undefined}
-				<span class="text-brand">{String(index).padStart(2, '0')};</span>
-			{/if}
 			{dateFormatter.format(new Date(post.date))} · {post.readTime} min read
 		</p>
 		<h2 class="font-brand text-xl font-semibold tracking-tight text-foreground sm:text-2xl">

@@ -8,8 +8,6 @@
 	}
 
 	let { data }: Props = $props();
-
-	const PAGE_SIZE = 10;
 </script>
 
 <!-- Hero: display serif headline, "currently" line, featured photograph -->
@@ -77,8 +75,8 @@
 <section id="writing" class="fade-up mx-auto flex w-full max-w-3xl flex-col gap-6">
 	<SectionLabel title="Writing" />
 	<div>
-		{#each data.posts as post, i (post.slug)}
-			<PostCard {post} index={(data.page - 1) * PAGE_SIZE + i + 1} />
+		{#each data.posts as post (post.slug)}
+			<PostCard {post} />
 		{/each}
 	</div>
 

@@ -9,7 +9,8 @@
 
 	let { data }: Props = $props();
 
-	const filterQs = () => (data.q ? `q=${encodeURIComponent(data.q)}` : `tag=${encodeURIComponent(data.tag as string)}`);
+	const filterQs = () =>
+		data.q ? `q=${encodeURIComponent(data.q)}` : `tag=${encodeURIComponent(data.tag as string)}`;
 </script>
 
 <svelte:head>
@@ -27,7 +28,8 @@
 			{:else}
 				Tagged &ldquo;{data.tag}&rdquo;
 			{/if}
-			· {data.total} {data.total === 1 ? 'post' : 'posts'}
+			· {data.total}
+			{data.total === 1 ? 'post' : 'posts'}
 		</p>
 		<a
 			href="/"
@@ -64,7 +66,8 @@
 		{/each}
 		{#if data.posts.length === 0}
 			<p class="border-t border-border py-6 text-sm text-muted-foreground">
-				No posts matched{#if data.q} &ldquo;{data.q}&rdquo;{/if}.
+				No posts matched{#if data.q}
+					&ldquo;{data.q}&rdquo;{/if}.
 			</p>
 		{/if}
 	</div>
