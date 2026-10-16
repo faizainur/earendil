@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource/jetbrains-mono';
+@plugin '@tailwindcss/typography';
+
+/* Semantic color tokens, mirroring the Flowstep mockups (shadcn-style zinc palette). */
+:root {
+	--background: #ffffff;
+	--foreground: #09090b;
+	--card: #ffffff;
+	--primary: #18181b;
+	--muted: #f4f4f5;
+	--muted-foreground: #71717a;
+	--accent: #f4f4f5;
+	--border: #e4e4e7;
+}
+
+[data-theme='dark'] {
+	--background: #09090b;
+	--foreground: #fafafa;
+	--card: #09090b;
+	--primary: #fafafa;
+	--muted: #27272a;
+	--muted-foreground: #a1a1aa;
+	--accent: #27272a;
+	--border: #27272a;
+}
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+	--container-page: 1120px;
+	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-primary: var(--primary);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-border: var(--border);
+}
+
+@layer base {
+	html {
+		font-family: var(--font-sans);
+		background: var(--background);
+		color: var(--foreground);
+	}
+}

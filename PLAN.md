@@ -1,0 +1,121 @@
+# Personal Blog FE — Step-by-Step Milestone Plan
+
+Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiable outcome.
+
+---
+
+## Milestone 1 — Scaffold + Tailwind + Theme system
+
+**Goal:** running app with design tokens, theme toggle, layout shell.
+
+1. `npx sv create` → SvelteKit, Svelte 5, TypeScript, ESLint + Prettier.
+2. Install Tailwind v4: `@tailwindcss/vite` (add plugin to `vite.config.ts`); `src/app.css` = `@import "tailwindcss"`.
+3. Install `@tailwindcss/typography`, `prettier-plugin-tailwindcss`, and fonts: `@fontsource-variable/inter` + `@fontsource/jetbrains-mono` (self-hosted, imported in `src/app.css`).
+4. Extract exact tokens from Flowstep screens (`get-screen-jsx`): surface/surface-dark, ink/ink-muted, border-subtle, radii → fill `@theme` block (`--container-page: 1120px`, `--font-sans: "Inter Variable", …`, `--font-mono: "JetBrains Mono", …`).
+5. Add `@custom-variant dark` (data-theme based).
+6. Theme store: cookie-based (`+layout.server.ts` reads `theme` cookie → `data-theme` on `<html>`; `+layout.svelte` handles toggle → optimistic flip + cookie set; default = `prefers-color-scheme`).
+7. Build layout shell components (Tailwind utilities only):
+   - `Navbar.svelte`: wordmark + nav + `SearchPill` (desktop) / icon button (mobile, same styling per §8 of DESIGN.md) + `ThemeToggle` (sun/moon).
+   - `Footer.svelte`: `© 2024 Felix` + GitHub/LinkedIn/RSS only.
+   - Page container: `mx-auto max-w-page px-4 md:px-6`.
+8. Placeholder `/` page to verify chrome.
+
+**Verify:** app renders shell; toggle flips light/dark with no FOUC on reload; 1120px container respected; navbar collapses correctly at mobile widths.
+
+---
+
+## Milestone 2 — API client + mock layer
+
+**Goal:** typed data layer, swappable mock↔real.
+
+1. `src/lib/api/types.ts`: `PostSummary`, `PostDetail`, list/suggest response shapes (per DESIGN.md §4).
+2. `src/lib/api/client.ts`: interface + `fetch`-based implementation reading `PUBLIC_API_BASE`.
+3. `src/lib/api/mock.ts`: fixtures mirroring the screens (Selected writing list; "queue" results with unsplash `d55a2c14`/`d24cecb6`; sample article).
+4. Adapter selection: mock used when `PUBLIC_API_BASE` unset.
+
+**Verify:** unit-test the client against mock fixtures; types compile with no `any`.
+
+---
+
+## Milestone 3 — Homepage (SSR)
+
+**Goal:** Screen 1/5 parity.
+
+1. `routes/+page.server.ts`: SSR fetch curated "Selected writing" list from BE — **render payload as-is** (no FE sorting/limiting; curation is BE's job).
+2. `PostCard.svelte` / list rows: title, preview, date, read time (+ thumbnail treatment per design).
+3. Greeting + headline per mockup.
+4. Light/dark + responsive QA (stacked mobile cards).
+
+**Verify:** view-source shows SSR'd content; matches Screens 1 & 5.
+
+---
+
+## Milestone 4 — Markdown engine
+
+**Goal:** `render.ts` pipeline, tested standalone before UI.
+
+1. Install: `markdown-it`, `markdown-it-anchor`, `isomorphic-dompurify`, `shiki`.
+2. `src/lib/markdown/render.ts`:
+   - markdown-it + anchor (slugify) + tables/strikethrough/task-lists.
+   - Shiki fence highlighter, `themes: { light, dark }`, bundle only: `go, rust, clojure, javascript, typescript, python, bash, yaml, json, dockerfile, hcl`.
+   - TOC extraction from tokens (h2/h3 + ids) → structured JSON.
+   - DOMPurify sanitize of final HTML.
+3. Shiki CSS-var mapping block (raw-CSS exception #2).
+4. Unit tests on fixtures: headings/anchors, code blocks dual-theme output, TOC shape, sanitization strips `<script>`.
+
+**Verify:** tests green; sample article HTML renders correct with anchors + highlighted code.
+
+---
+
+## Milestone 5 — Article page
+
+**Goal:** Screens 2 & 6 parity.
+
+1. `posts/[slug]/+page.server.ts`: fetch post, run `render.ts` server-side → `{ html, toc, meta }`.
+2. Layout: `lg:grid` three zones — left metadata rail / main `.prose` column / right sticky TOC (`sticky top-x`, hidden `<lg`).
+3. Inline TOC under title (mobile path), body sections, blockquote style, "Further reading" — **no comments section**.
+4. Client enhancement action on content container: code copy buttons, `loading=lazy` images, IntersectionObserver active-TOC highlight.
+
+**Verify:** matches Screens 2/6; mobile collapses correctly; TOC scroll-sync works.
+
+---
+
+## Milestone 6 — Search palette
+
+**Goal:** Screens 1/5 dialog + mobile triggers.
+
+1. `SearchDialog.svelte`: centered rounded dialog, dim + `backdrop-filter: blur`, pill-zoom transition (raw-CSS exception #3); mobile near-full-width sheet variant via classes only.
+2. Global `Mod+K`/`Ctrl+K` keybind; pill click; mobile icon-button tap.
+3. Debounced (200ms) suggest calls with `AbortController`; result rows (thumbnail/title/preview/date+readTime); Enter/click → navigate; loading skeletons; empty state.
+4. A11y: focus trap, `role="dialog"`, Esc closes, focus restore.
+
+**Verify:** keyboard-only flow works; matches mockup states; abort race test.
+
+---
+
+## Milestone 7 — Responsive + a11y polish
+
+1. Screenshot-diff QA against **all 8 Flowstep screens** (theme × viewport).
+2. Touch targets ≥44px; contrast pass; semantic landmarks; `prefers-reduced-motion` on dialog/pill-zoom transitions.
+3. Lighthouse pass (SEO, a11y, performance) on home + article.
+
+**Verify:** zero known visual deviations from the 8 screens; Lighthouse ≥95 a11y/SEO.
+
+---
+
+## Milestone 8 — Deploy + BE swap
+
+1. `adapter-node` build → Dockerfile (multi-stage, non-root).
+2. K3s manifest sized to reserved budget (256Mi req / 512Mi limit); `PUBLIC_API_BASE` env.
+3. When real BE is live: set `PUBLIC_API_BASE`, remove mock. **Any other change ⇒ contract drift — fix the API, not the FE.**
+4. RSS link → BE `/feed.xml`.
+
+**Verify:** container runs on cluster; real articles flow end-to-end with no FE code change.
+
+---
+
+## Open decisions — RESOLVED
+
+- **Shiki language set**: `go, rust, clojure, javascript, typescript, python, bash, yaml, json, dockerfile, hcl` (Terraform). K8s via `yaml`.
+- **Fonts**: Inter (self-hosted variable) + JetBrains Mono for code. Alts if desired: Geist Sans, Atkinson Hyperlegible.
+- **"Selected writing"**: BE-curated; FE renders payload as-is. **General rule: no FE post-processing of any BE data** (articles, list, search, suggestions). TOC extraction remains a rendering step, not data processing.
