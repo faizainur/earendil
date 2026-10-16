@@ -51,22 +51,27 @@
 	}
 }
 
-/* Slim themed horizontal scrollbar for the homepage photo strip (utilities can't reach ::-webkit-*). */
-.scroll-slim {
+/* Slim themed horizontal scrollbars — homepage photo strip + article code blocks (pseudo-elements aren't reachable via utilities). */
+.scroll-slim,
+.prose pre {
 	scrollbar-width: thin;
 	scrollbar-color: var(--border) transparent;
 }
-.scroll-slim::-webkit-scrollbar {
+.scroll-slim::-webkit-scrollbar,
+.prose pre::-webkit-scrollbar {
 	height: 6px;
 }
-.scroll-slim::-webkit-scrollbar-track {
+.scroll-slim::-webkit-scrollbar-track,
+.prose pre::-webkit-scrollbar-track {
 	background: transparent;
 }
-.scroll-slim::-webkit-scrollbar-thumb {
+.scroll-slim::-webkit-scrollbar-thumb,
+.prose pre::-webkit-scrollbar-thumb {
 	background: var(--border);
 	border-radius: 9999px;
 }
-.scroll-slim::-webkit-scrollbar-thumb:hover {
+.scroll-slim::-webkit-scrollbar-thumb:hover,
+.prose pre::-webkit-scrollbar-thumb:hover {
 	background: var(--muted-foreground);
 }
 

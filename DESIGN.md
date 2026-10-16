@@ -128,7 +128,7 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
 3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the future search dialog.
-4. Slim themed horizontal scrollbar (`.scroll-slim`) for the homepage photo strip — pseudo-elements aren't reachable via utilities.
+4. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — photo strip and overflowing code blocks; pseudo-elements aren't reachable via utilities.
 
 ## 8. Responsive matrix
 
