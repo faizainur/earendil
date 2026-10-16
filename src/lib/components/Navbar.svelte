@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { cubicOut } from 'svelte/easing';
+	import { fade, slide } from 'svelte/transition';
 	import { Menu, Search, X } from 'lucide-svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import SearchDialog from './SearchDialog.svelte';
@@ -23,6 +25,14 @@
 	let open = $state(false);
 	let searchOpen = $state(false);
 	let searchTrigger: HTMLElement | null = null;
+
+	// Honor reduced-motion: collapse the menu animation to a plain toggle.
+	// (Guarded: $derived also evaluates during SSR, where window is absent.)
+	const reduced = $derived(
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+	);
+	const slideOpts = $derived({ duration: reduced ? 0 : 180, easing: cubicOut });
+	const fadeOpts = $derived({ duration: reduced ? 0 : 150 });
 
 	function openSearch() {
 		if (searchOpen) return;
@@ -139,29 +149,33 @@
 	</div>
 
 	{#if open}
-		<!-- Tap-away layer under the panel -->
+		<!-- Tap-away layer under the panel; dialog-style dim+blur scrim, fades with the menu -->
 		<div
-			class="fixed inset-0 z-10 md:hidden"
+			class="fixed inset-0 z-10 bg-background/60 backdrop-blur-[2px] md:hidden"
 			aria-hidden="true"
+			transition:fade={fadeOpts}
 			onclick={() => (open = false)}
 		></div>
 		<nav
 			id="mobile-nav"
 			aria-label="Main navigation"
-			class="absolute inset-x-0 top-full z-20 flex flex-col border-b border-border bg-background p-5 shadow-lg md:hidden"
+			class="absolute inset-x-0 top-full z-20 flex flex-col overflow-hidden border-b border-border bg-background shadow-lg md:hidden"
+			transition:slide|local={slideOpts}
 		>
-			{#each links as link (link.href)}
-				<a
-					href={link.href}
-					onclick={() => (open = false)}
-					class="rounded px-3 py-3 text-sm transition-colors {isActive(link.href)
-						? 'font-medium text-foreground'
-						: 'text-muted-foreground hover:text-foreground'}"
-					aria-current={isActive(link.href) ? 'page' : undefined}
-				>
-					{link.label}
-				</a>
-			{/each}
+			<div class="flex flex-col p-5">
+				{#each links as link (link.href)}
+					<a
+						href={link.href}
+						onclick={() => (open = false)}
+						class="rounded px-3 py-3 text-sm transition-colors {isActive(link.href)
+							? 'font-medium text-foreground'
+							: 'text-muted-foreground hover:text-foreground'}"
+						aria-current={isActive(link.href) ? 'page' : undefined}
+					>
+						{link.label}
+					</a>
+				{/each}
+			</div>
 		</nav>
 	{/if}
 
