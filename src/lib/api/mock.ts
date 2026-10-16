@@ -371,6 +371,24 @@ export const mockApi: BlogApi = {
 		return { results };
 	},
 
+	async searchPosts(q, { offset = 0, limit = 10 } = {}) {
+		const needle = q.toLowerCase().trim();
+		if (!needle) return { total: 0, items: [] };
+		const scored = posts
+			.map((p) => ({
+				post: p,
+				score:
+					`${p.title} ${p.subtitle} ${p.preview} ${p.tags.join(' ')}`.toLowerCase().split(needle)
+						.length - 1
+			}))
+			.filter((s) => s.score > 0)
+			.sort((a, b) => b.score - a.score);
+		return {
+			total: scored.length,
+			items: scored.slice(offset, offset + limit).map((s) => summarize(s.post))
+		};
+	},
+
 	async getPhotos({ limit = photos.length } = {}) {
 		return { total: photos.length, items: photos.slice(0, limit) };
 	},

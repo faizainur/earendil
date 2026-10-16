@@ -11,6 +11,8 @@ export interface BlogApi {
 	getPosts(opts?: { offset?: number; limit?: number; tag?: string }): Promise<PostListResponse>;
 	getPost(slug: string): Promise<PostDetail>;
 	suggestPosts(q: string, limit?: number): Promise<SuggestResponse>;
+	/** Ranked, paginated full-text search — the /search page (suggest is the palette's capped launcher). */
+	searchPosts(q: string, opts?: { offset?: number; limit?: number }): Promise<PostListResponse>;
 	getPhotos(opts?: { limit?: number }): Promise<PhotoListResponse>;
 	/** The homepage hero photo — curation is the BE's call; null when unset. */
 	getFeaturedPhoto(): Promise<Photo | null>;
@@ -54,6 +56,12 @@ function createFetchApi(base: string): BlogApi {
 			const params = new URLSearchParams({ q });
 			if (limit !== undefined) params.set('limit', String(limit));
 			return get<SuggestResponse>(`/api/search/suggest?${params}`);
+		},
+		searchPosts(q, opts) {
+			const params = new URLSearchParams({ q });
+			if (opts?.offset !== undefined) params.set('offset', String(opts.offset));
+			if (opts?.limit !== undefined) params.set('limit', String(opts.limit));
+			return get<PostListResponse>(`/api/search?${params}`);
 		},
 		getPhotos(opts) {
 			const params = new URLSearchParams();

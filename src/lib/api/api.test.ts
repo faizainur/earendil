@@ -38,6 +38,15 @@ describe('getPosts', () => {
 		const none = await mockApi.getPosts({ tag: 'nope' });
 		expect(none.items).toEqual([]);
 	});
+
+	it('searches with ranking, totals, and pagination', async () => {
+		const { total, items } = await mockApi.searchPosts('queue');
+		expect(total).toBeGreaterThanOrEqual(1);
+		expect(items[0].slug).toBe('shape-of-a-useful-queue');
+		expect((await mockApi.searchPosts('zzzz-nothing')).items).toEqual([]);
+		const paged = await mockApi.searchPosts('a', { offset: 1, limit: 1 });
+		expect(paged.items).toHaveLength(1);
+	});
 });
 
 describe('getPost', () => {
