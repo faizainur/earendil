@@ -29,10 +29,9 @@ export function codeBlockTools(node: HTMLElement) {
 
 	for (const pre of Array.from(node.querySelectorAll('pre'))) {
 		const toolbar = document.createElement('div');
+		// Quick, understated fade both ways: 100ms ease-out reads as natural without the user noticing it.
 		toolbar.className =
-			'code-tools absolute top-2 right-2 flex gap-2 opacity-0 ' +
-			'group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-150 ' +
-			'group-focus-within:opacity-100 group-focus-within:transition-opacity';
+			'code-tools absolute top-2 right-2 flex gap-2 opacity-0 transition-opacity duration-100 ease-out group-hover:opacity-100 group-focus-within:opacity-100';
 
 		const wrap = document.createElement('button');
 		wrap.type = 'button';
