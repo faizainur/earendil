@@ -5,9 +5,10 @@ import { mockApi } from './mock';
 describe('getPosts', () => {
 	it('returns all posts with correct total', async () => {
 		const { total, items } = await mockApi.getPosts();
-		expect(total).toBe(4);
-		expect(items).toHaveLength(4);
+		expect(total).toBe(5);
+		expect(items).toHaveLength(5);
 		expect(items.map((p) => p.slug)).toEqual([
+			'observability-is-a-contract',
 			'shape-of-a-useful-queue',
 			'when-latency-becomes-a-product-decision',
 			'designing-for-the-failure-you-can-see',
@@ -17,10 +18,10 @@ describe('getPosts', () => {
 
 	it('honors offset and limit', async () => {
 		const { total, items } = await mockApi.getPosts({ offset: 1, limit: 2 });
-		expect(total).toBe(4);
+		expect(total).toBe(5);
 		expect(items.map((p) => p.slug)).toEqual([
-			'when-latency-becomes-a-product-decision',
-			'designing-for-the-failure-you-can-see'
+			'shape-of-a-useful-queue',
+			'when-latency-becomes-a-product-decision'
 		]);
 	});
 

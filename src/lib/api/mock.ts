@@ -60,6 +60,107 @@ const photos: Photo[] = [
 
 const posts: PostDetail[] = [
 	{
+		slug: 'observability-is-a-contract',
+		title: 'Observability is a contract, not a dashboard',
+		subtitle: 'Schemas, sampling budgets, and the questions your pager will actually ask',
+		preview:
+			'A long-form field guide to logs, traces, and metrics as promises between teams: what every service owes its operators, how to structure a logging schema that survives contact with reality, why sampling is a product decision, and how to keep cardinality inside a budget instead of a warning. Includes worked examples in Go, YAML, and shell.',
+		date: '2024-06-02',
+		readTime: 16,
+		thumbnail: thumbnails[1],
+		tags: ['observability', 'logging', 'tracing', 'metrics'],
+		content: `Dashboards are what observability looks like after it has already failed. The interesting part happens earlier, as a contract: every service promising, in writing, that it can answer certain questions about itself when things go wrong at 3am.
+
+This is a long one. Grab coffee.
+
+## Why "observability" is a contract
+
+A system is observable when an operator can ask arbitrary questions of it without shipping new code. That definition sounds academic until you watch someone try to answer "which tenant drove the p99 spike between 02:10 and 02:20?" on a system that logs free-text strings.
+
+### The questions you must be able to ask cold
+
+Before a service touches production, its owner should be able to answer these without opening a laptop:
+
+- What is it doing right now, and where is it stuck?
+- Which upstream dependency is slowing it down?
+- Which tenant, feature flag, or queue is responsible for the pain?
+- What changed in the last deploy window?
+
+If any of those require archaeology, the contract is incomplete.
+
+### What the pager actually needs
+
+The page itself is the last mile of observability. A page that does not name a ~~vague symptom~~ specific failed contract is noise wearing a trench coat.
+
+## Structured logs with a schema you can defend
+
+Free-text logs are a compounding tax: every query pays it, forever. A schema is the down payment.
+
+### Fields worth standardizing
+
+Every log line in the system should carry a common spine:
+
+\`\`\`go
+type LogFields struct {
+	Timestamp  time.Time \x60json:"ts"\x60
+	Level      string    \x60json:"level"\x60
+	Service    string    \x60json:"svc"\x60
+	RequestID  string    \x60json:"rid"\x60
+	TenantID   string    \x60json:"tenant,omitempty"\x60
+	DurationMs float64   \x60json:"dur_ms,omitempty"\x60
+}
+\`\`\`
+
+The boring names matter more than the coverage. Two services disagreeing on \`rid\` versus \`request_id\` costs more over a year than any missing field.
+
+### The cost of free-text everything
+
+The tax shows up exactly when you cannot afford it: mid-incident, when every second of grep is a second of user pain.
+
+## Traces: promises between services
+
+A trace is a document signed by every service a request touched. It is only trustworthy if all the signers use the same pen.
+
+### Sampling is a product decision
+
+Head-based sampling at 1% feels economical until the one story you need is in the 99% you dropped. Tail-based sampling keeps the interesting stories:
+
+\`\`\`bash
+# keep anything slower than 1s, and 1% of everything else
+tail-sample --latency-p99 1s --keep-slow --baseline 0.01
+\`\`\`
+
+The teams that treat sampling as configuration eventually treat it as roadmap.
+
+## Metrics and the cardinality budget
+
+Every label on a metric is a multiplier on storage, query cost, and the chance you ship a panic.
+
+| Signal   | Good labels                        | Terrible labels        |
+| -------- | ---------------------------------- | ---------------------- |
+| Requests | route, status, tenant              | user_id, full URL path |
+| Latency  | route, dependency                  | pod name (churns)      |
+| Errors   | error class                          | raw error string     |
+
+## Making it all survive a bad Monday
+
+The contract only exists if it is checked:
+
+- [x] every service emits the log spine above
+- [x] dashboards link to saved queries, not screenshots
+- [ ] a quarterly "delete your dashboard" review
+- [ ] one game day per quarter with the tracing backend on fire
+
+> Observability is not a tool you buy. It is a promise your services make to whoever gets paged — usually future you.
+
+## Further reading
+
+- [A lesson in sending structured logs](https://example.com/structured-logs)
+- [The cardinality problem in practice](https://example.com/cardinality)
+- [Designing pages people answer](https://example.com/paging)
+`
+	},
+	{
 		slug: 'shape-of-a-useful-queue',
 		title: 'The shape of a useful queue',
 		subtitle: 'Backpressure, fairness, and the promises hidden between producers and consumers',
