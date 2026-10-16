@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { X } from 'lucide-svelte';
+	import { focusOnMount } from '#lib/actions.ts';
 
 	export interface LightboxImage {
 		src: string;
@@ -39,10 +40,9 @@
 		/>
 		<figcaption class="pt-3 text-center text-sm text-muted-foreground">{image.alt}</figcaption>
 	</figure>
-	<!-- svelte-ignore a11y_autofocus -->
 	<button
 		type="button"
-		autofocus
+		use:focusOnMount
 		class="absolute top-4 right-4 flex size-9 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition-colors hover:bg-muted"
 		aria-label="Close"
 		onclick={onclose}

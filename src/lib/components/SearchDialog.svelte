@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { Search } from 'lucide-svelte';
+	import { focusOnMount } from '#lib/actions.ts';
 	import { api } from '#lib/api/index.ts';
 	import type { PostSummary } from '#lib/api/index.ts';
 
@@ -130,11 +131,10 @@
 	>
 		<div class="flex items-center gap-3 border-b border-border px-5 py-4">
 			<Search class="size-5 shrink-0 text-muted-foreground" />
-			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				type="search"
 				bind:value={query}
-				autofocus
+				use:focusOnMount
 				aria-label="Search articles"
 				placeholder="Type to search…"
 				class="w-full bg-card text-lg text-foreground outline-none placeholder:text-muted-foreground"

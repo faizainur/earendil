@@ -140,6 +140,15 @@ export function codeBlockTools(node: HTMLElement) {
 }
 
 /**
+ * Focuses the node on mount. The `autofocus` attribute is unreliable here:
+ * browsers only honor it for the initial page render, not dynamically mounted
+ * dialogs (Svelte inserts them after load).
+ */
+export function focusOnMount(node: HTMLElement) {
+	node.focus();
+}
+
+/**
  * Makes every `<img>` inside the container click-to-zoom: adds a zoom cursor
  * and forwards `{ src, alt }` to the callback (the parent renders an ImageLightbox).
  */
