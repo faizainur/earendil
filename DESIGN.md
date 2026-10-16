@@ -2,7 +2,7 @@
 
 > UI source of truth: Flowstep file `f82d3fbc-3f1e-4f24-ac48-e19143ccb2fa` (8 screens:
 > light/dark × homepage/article × desktop/mobile, plus mobile light/dark variants).
-> Note: `/home/fzr/Projects/personal-blog/DESIGN.md` is the backend K3s infra blueprint — unrelated to this FE design.
+> Note: the backend K3s infra blueprint lives in [ARCHITECTURE.md](ARCHITECTURE.md) — this file is the FE design doc.
 
 ## 1. Stack
 
@@ -11,8 +11,8 @@
 | Framework          | **Svelte 5 + SvelteKit** (TypeScript, Vite)                                                                                                                | Small bundle, great interactions (search palette), file-based routing, SSR                                                                              |
 | Fonts              | **Inter** (variable, self-hosted `@fontsource-variable/inter`) + **JetBrains Mono** (`@fontsource/jetbrains-mono`) + **Fraunces Variable** (wordmark only) | Sans matches the mockup grotesque; self-hosted = no external request/FOUT. Fraunces (SOFT/WONK axes) is the `fzr;` brand serif — never used for body/UI |
 | Rendering          | **SSR** via `adapter-node`                                                                                                                                 | SEO (articles crawlable), server-side API fetch in load functions, fits K3s 256/512Mi backend container budget                                          |
-| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                                                                  | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~8 exceptions, §7)                                                            |
-| Markdown           | **markdown-it** + `markdown-it-anchor` (+ tables/strikethrough/task-lists)                                                                                 | Runtime content from API ⇒ mdsvex (build-time) is not applicable; token access powers TOC/anchors                                                       |
+| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                                                                  | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~7 exceptions, §7)                                                            |
+| Markdown           | **markdown-it** + `markdown-it-anchor` + `markdown-it-container` (`::: grid` masonry) + task-lists                                                         | Runtime content from API ⇒ mdsvex (build-time) is not applicable; token access powers TOC/anchors                                                       |
 | Sanitization       | **DOMPurify** (`isomorphic-dompurify`, server-side)                                                                                                        | Mandatory — API content treated as untrusted                                                                                                            |
 | Code highlighting  | **Shiki, server-side**, dual-theme mode (`themes: { light, dark }`)                                                                                        | VS Code-grade grammars; client ships plain highlighted HTML; theme flips via CSS vars without refetch                                                   |
 | Article typography | `@tailwindcss/typography` as base, overridden to match mockups                                                                                             | Avoids hand-writing prose CSS                                                                                                                           |
@@ -26,15 +26,16 @@
 | `/search`       | Results page for a _query_ (`?q=`) or a _tag_ (`?tag=`), SSR-paginated (size 10, filter preserved across pages). "Results for \"x\" · N posts" + Clear link + an on-page search form (GET). Query views are `noindex`. Reuses `PostCard` rows. This is the destination for the palette's "see all" and every tag chip.                                                                                                            | —                   |
 | `/gallery`      | Full mixed-aspect masonry grid (`columns-2 md:columns-3`, lazy, reserved dimensions) — the interesting mis-aligned rows live here, not on the homepage                                                                                                                                                                                                                                                                            | —                   |
 | `/about`        | Static FE bio page (hero-style header + paragraphs); trivially movable to BE-driven later                                                                                                                                                                                                                                                                                                                                         | —                   |
-| `/posts/[slug]` | Title + description, breadcrumb below (`Home / Articles / <title>`), hero thumbnail when present, metadata, inline TOC, body sections, quote, "Further reading". **No comments/Discussion section**                                                                                                                                                                                                                               | 2 (light), 6 (dark) |
+| `/posts/[slug]` | Fraunces serif title + preview description, breadcrumb below (`Home / Writing / <title>` — Writing anchors to `/#writing`), hero thumbnail when present, mono date·read-time masthead + tag chips in the meta rail, inline TOC (mobile) + sticky `Contents;` rail, body sections, quote, "Further reading". **No comments/Discussion section**                                                                                    | 2 (light), 6 (dark) |
 | (future)        | RSS redirect to BE `/feed.xml`                                                                                                                                                                                                                                                                                                                                                                                                    | —                   |
 
 Layout shell (all pages):
 
 - **Route-change feedback**: a fixed 2px `--brand` violet progress bar rides across the top whenever SvelteKit navigates between pages — it eases to ~94% while loading, then sweeps to 100% and fades. Hover-preloaded routes finish in ~1 frame, so a small JS state machine guarantees a minimum visible beat (~280ms) before the fade. Hash-only jumps (TOC links) are excluded; reduced-motion gets a plain static bar.
-- **Section labels**: every section header is `SectionLabel.svelte` — Fraunces small label + violet `;` marker (the brand motif repeated as rhythm).
+- **Section labels**: `SectionLabel.svelte` renders section headers as quiet **Fraunces `text-2xl` headings** (`Writing`, `Photography`) — no border, no punctuation; the first row's own hairline rules the heading.
+- **Entrance choreography**: page sections rise in staggered (`fade-up`, 0/120/240ms beats); same-route content swaps (pagination, search query/tag changes) re-mount via Svelte `{#key}` and play a pure 400ms `fade-in` — reduced-motion disables both.
 - **Container**: centered `max-w-page` (1120px) with generous equal side margins; content never stretches to full viewport. Mobile: `px-4`/`px-6` gutters.
-- **Navbar**: wordmark **`fzr;`** (Fraunces brand serif, `SOFT 40 / WONK 1`: `fzr` foreground + **violet semicolon** `--brand` — the accent is reserved to the punctuation, nothing else; serif is wordmark-only) + **3 links (Home · Gallery · About)** with pathname-derived active state (`aria-current="page"`) + **Search pill** (opens the ⌘K palette) + **Theme toggle**. Desktop links carry the brand motif: a violet (`--brand`) underline grows from the left on hover and stays on the active page (`after:` utilities). Search is reached via the pill/⌘K, not a nav link.
+- **Navbar**: wordmark **`fzr;`** (Fraunces brand serif, `SOFT 40 / WONK 1`: `fzr` foreground + **violet semicolon** `--brand` — the accent is reserved to the punctuation, nothing else; serif is wordmark-only) + **3 links (Home · Gallery · About)** with pathname-derived active state (`aria-current="page"`) + **Search pill** (opens the ⌘K palette) + **Theme toggle**. Desktop links carry the brand motif: a violet (`--brand`) underline grows from the left on hover and stays on the active page (`after:` utilities). Search is reached via the pill/⌘K, not a nav link. The wordmark is the author's stylized initials (Faiz Ainur Rofiq).
 - **Mobile nav**: links collapse into a **hamburger** (`md:hidden`); icon button toggles a dropdown panel under the header with stacked links; closes on link click, `Esc`, outside tap, and on navigation; `aria-expanded`/`aria-controls`. Opens/closes with a 180ms `slide` (cubic-out) + dimmed, blurred scrim (dialog scrim language), auto-collapsed under reduced-motion.
 - **Search pill (desktop)**: bordered rounded pill, magnifier icon, label "Search", visible `Mod+K` kbd hint.
 - **Search (mobile)**: compact bordered **rounded-square icon-only button** (magnifier only; no label, no kbd hint). Pill hidden on mobile; icon button hidden on desktop. Icon button + theme toggle fit on one mobile header row, ≥44px touch targets.
@@ -79,7 +80,8 @@ Content arrives at **runtime from the BE** (not build time). One typed client in
 ```
 GET /api/posts?offset&limit&tag    → { total, items: PostSummary[] }   // tag = optional BE-side filter
 GET /api/posts/:slug               → { ...PostSummary, tags, content }
-GET /api/search/suggest?q&limit    → { results: PostSummary[] }
+GET /api/search/suggest?q&limit    → { results: PostSummary[] }   // palette, capped
+GET /api/search?q&offset&limit       → { total, items: PostSummary[] }   // /search page, ranked
 GET /api/photos                    → { total, items: Photo[] }        // /gallery masonry
 GET /api/photos/featured           → Photo | 404                      // homepage hero photo (null-tolerant)
 
@@ -98,17 +100,17 @@ Photo = { src, alt, width, height }   // natural dimensions; mixed aspect ratios
 
 Rules:
 
-- **FE renders BE payloads as-is** — no post-processing of any data (articles, list, search, suggestions): no FE-side sorting, filtering, or derived fields. Curation (e.g., "Selected writing") is expressed by the BE in its response.
+- **FE renders BE payloads as-is** — no post-processing of any data (articles, list, search, suggestions): no FE-side sorting, filtering, or derived fields. Curation (list order, the featured hero photograph, tag sets) is expressed by the BE in its response.
 - **Article meta is JSON fields, not frontmatter embedded in Markdown** — list/search views must show title/date/readTime/thumbnail without fetching or parsing full content. (If BE stores frontmatter, BE parses it.)
 - **readTime is computed by the BE** at publish time, never in the FE.
-- Mock adapter ships fixture data mirroring the mockups (greeting, Selected writing list, "queue" search results with unsplash `d55a2c14` / `d24cecb6` thumbnails, sample article with sections/quote/Further reading) until BE is live.
+- Mock adapter ships a 12-post fixture corpus (spans two home pages so pagination is exercisable), a featured hero photo, and "queue"-matching search fixtures until BE is live.
 
 ## 5. Search & Suggestion (BE-driven)
 
 **Command palette dialog**, matching Screens 1/5:
 
 - Opens: `Mod+K` / `Ctrl+K` globally · click pill (desktop) · tap icon button (mobile).
-- Dialog: centered rounded card (`max-w-xl` desktop; `inset-x-3` near-full-width sheet on mobile), over **dimmed + softly blurred** background (`backdrop-filter: blur`), approximating the pill-zoom transition.
+- Dialog: centered rounded card (`max-w-2xl` desktop; `inset-x-3` near-full-width sheet on mobile), over **dimmed + softly blurred** background (`backdrop-filter: blur`), approximating the pill-zoom transition.
 - Focused input on open (mount-time `focus()` — the `autofocus` attribute no-ops on dynamic dialogs); results render **below the input** inside the dialog.
 - Per keystroke: **200ms debounce** → `suggestPosts` (`/api/search/suggest`, capped 8), guarded by a **monotonic request sequence** (stale responses dropped — `suggestPosts` takes no AbortSignal).
 - Result row: small thumbnail (when present), title, 1–2 line preview, date + read time. Enter/click → `/posts/:slug`.
@@ -132,29 +134,33 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
-3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the future search dialog.
+3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the search dialog.
 4. Theme-switch circular reveal — `::view-transition-*(root)` + `theme-reveal` keyframes (View Transitions API; pseudo-elements not reachable via utilities).
-5. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — photo strip, overflowing code blocks and masonry gutters; pseudo-elements aren't reachable via utilities.
+5. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — overflowing code blocks and masonry gutters; pseudo-elements aren't reachable via utilities.
 6. Route-change progress bar (`.route-progress`) — fixed 2px brand-violet bar; active/finishing/idle phases driven by `$app/state navigating` (minimum visible beat for preloaded instant navigations; hash-only jumps excluded).
-7. Entrance choreography (`.fade-up`) — staggered opacity/translateY rise for homepage sections (per-section `animation-delay`; reduced-motion off-switch).
+7. Entrance choreography — `.fade-up` (staggered rise for page sections, per-section `animation-delay`) and `.fade-in` (pure-opacity swap for paginated/filterable lists via `{#key}` re-mount); reduced-motion disables both.
 
 ## 8. Responsive matrix
 
-| Area           | Mobile `< md`/`< lg`                                                                                                                                                                                         | Desktop                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| Container      | `px-4/6` gutters                                                                                                                                                                                             | 1120px centered, generous margins                 |
-| Navbar search  | icon-only rounded-square button                                                                                                                                                                              | pill + label + `Mod+K` kbd                        |
-| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden                                                                                                                                                | meta rail / main / sticky TOC grid                |
-| Search dialog  | `inset-x-3` sheet                                                                                                                                                                                            | centered `max-w-xl` card                          |
-| Home list      | section opens with a serif "Writing" heading; rows: mono date·read-time masthead **above** a Fraunces serif title (violet underline grows on hover), subtitle, 3-line clamped preview; small right thumbnail | same, wider gaps; row hover fills `accent/40`     |
-| Photography    | `/gallery` only: 2-col masonry (home strip removed in the consolidation)                                                                                                                                     | `/gallery`: 3-col masonry                         |
-| Writing header | —                                                                                                                                                                                                            | home: horizontal strip; `/gallery`: 3-col masonry |
-| Footer         | wraps/stacks                                                                                                                                                                                                 | single constrained row                            |
+| Area           | Mobile `< md`/`< lg`                                                                                                                                                                                         | Desktop                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Container      | `px-4/6` gutters                                                                                                                                                                                             | 1120px centered, generous margins             |
+| Navbar search  | icon-only rounded-square button                                                                                                                                                                              | pill + label + `Mod+K` kbd                    |
+| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden                                                                                                                                                | meta rail / main / sticky TOC grid            |
+| Search dialog  | `inset-x-3` sheet                                                                                                                                                                                            | centered `max-w-2xl` card                     |
+| Home list      | section opens with a serif "Writing" heading; rows: mono date·read-time masthead **above** a Fraunces serif title (violet underline grows on hover), subtitle, 3-line clamped preview; small right thumbnail | same, wider gaps; row hover fills `accent/40` |
+| Photography    | `/gallery` only: 2-col masonry (home strip removed in the consolidation)                                                                                                                                     | `/gallery`: 3-col masonry                     |
+| Footer         | wraps/stacks                                                                                                                                                                                                 | single constrained row                        |
 
 Rules: consistent `md`/`lg` breakpoints; differences handled with visibility variants (`hidden md:flex` pill ↔ `md:hidden` icon button, `hidden lg:grid` rails), **never** duplicate mobile/desktop components except where markup genuinely differs. Touch targets ≥44px. QA against all 8 screens (light/dark automatic via tokens; desktop/mobile via variants).
 
-## 9. Deployment
+## 9. Deployment & domain topology
+
+**Canonical URL: `https://blog.ainurrofiq.com`** — author **Faiz Ainur Rofiq**.
 
 - `adapter-node` → small Docker container on the K3s cluster (matches reserved 256Mi/512Mi budget).
-- Config via env: `PUBLIC_API_BASE`.
-- RSS link points at BE `/feed.xml` (placeholder until BE exists).
+- **Subdomain plan:** `ainurrofiq.com` root → redirect/landing; `blog.` = this site; later `portal.ainurrofiq.com` and `cms.ainurrofiq.com` (blog BE). **`cms.` must not be publicly exposed** — FE-to-BE traffic uses in-cluster service URLs for `PUBLIC_API_BASE`; the public host stays internal or is hard-gated (allowlist/auth).
+- **TLS:** one wildcard cert `*.ainurrofiq.com` (cert-manager DNS-01) — new subdomains need no cert ceremony.
+- **Env:** `PUBLIC_API_BASE` (BE base, in-cluster; unset ⇒ mock layer) and `PUBLIC_SITE_URL` (canonical origin for absolute URLs: RSS items, future canonical/OG tags).
+- RSS: BE serves `/feed.xml` with absolute links built from `PUBLIC_SITE_URL`.
+- **Domain notes (checked 2026-10-17):** `fzr.com/.dev/.app/.xyz` taken (xyz parked-resale); `fzr.blog`/`fzr.me` registry-_premium_ (≈IDR 1M/yr — declined); `faizrofiq.com` verified available — optional insurance, unregistered. Vanity short-domain strategy skipped: `ainurrofiq.com` is the asset.

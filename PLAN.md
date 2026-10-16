@@ -2,6 +2,10 @@
 
 Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiable outcome.
 
+**Status (2026-10-17):** M1–M6 shipped and merged (M4 also gained the `::: grid` container directive); M7 (responsive/a11y polish) and M8 (deploy/BE swap) remain. Post-milestone rounds below (3.6/3.7) are delivered as separate merged branches.
+
+---
+
 ---
 
 ## Milestone 1 — Scaffold + Tailwind + Theme system
@@ -16,7 +20,7 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 6. Theme store: cookie-based (`+layout.server.ts` reads `theme` cookie → `data-theme` on `<html>`; `+layout.svelte` handles toggle → optimistic flip + cookie set; default = `prefers-color-scheme`).
 7. Build layout shell components (Tailwind utilities only):
    - `Navbar.svelte`: wordmark + nav + `SearchPill` (desktop) / icon button (mobile, same styling per §8 of DESIGN.md) + `ThemeToggle` (sun/moon).
-   - `Footer.svelte`: `© 2026 Faiz` + GitHub/LinkedIn/RSS only.
+   - `Footer.svelte`: `© 2026 Faiz Ainur Rofiq` + social links (owner-editable) + builder line.
    - Page container: `mx-auto max-w-page px-4 md:px-6`.
 8. Placeholder `/` page to verify chrome.
 
@@ -70,6 +74,32 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 ---
 
+## Milestone 3.6 — Listing consolidation (2026-10-17) · `milestone/search-consolidation` ✅
+
+**Goal:** one listing surface instead of two.
+
+1. `/articles` **removed**; home now lists ALL posts, SSR-paginated (`?page=N`, size 10, Newer/Older + "Page X of N"). Out-of-range pages 307-clamp, preserving filters.
+2. New `/search` route: query (`?q=`) **or** tag (`?tag=`) results page — ranked via new `GET /api/search?q&offset&limit`, paginated with filter preserved, on-page GET search form, `noindex` on query views, Clear link. Tags everywhere now link here.
+3. Palette gains the **see-all hand-off**: trailing `→ See all results for "…"` row in the arrow-key range; Enter with no match routes to `/search?q=`. Launcher stays capped at 8.
+4. Nav drops to **3 links** (Home · Gallery · About); breadcrumb middle crumb `Articles` → `Writing` (`/#writing`).
+5. `ArticleCard.svelte` **kept** in the codebase per owner's choice (unused); mock corpus grown to 12 posts so pagination is exercisable.
+6. `BlogApi.searchPosts` added (interface + fetch + mock ranking: occurrence score over title/subtitle/preview/tags).
+
+**Verify:** home spans 2 pages (`Page 1 of 2`, `?page=99`→307); `/search?tag=postgres` + `?q=queue` SSR correctly; palette keyboard flow; all tests updated (24).
+
+---
+
+## Milestone 3.7 — Brand identity & micro-motion (2026-10-17) · `milestone/home-identity` ✅
+
+1. **Hero:** Fraunces display headline (`md:text-5xl`, wonk-italic accent word, violet `;`), `currently —` micro-line, **featured photograph** right (`getFeaturedPhoto` → `GET /api/photos/featured`; grayscale→color bloom on hover, links to `/gallery`; line-art SVG fallback).
+2. **Listings redesign:** dropped the `01;` curation index (read as listicle); row = mono date·read-time masthead **above** a Fraunces serif title with violet underline-grow on hover; section headers became serif `Writing`/`Photography` headings (SectionLabel v2).
+3. **Motion:** staggered `fade-up` entrance on all pages; `fade-in` (400ms) + `{#key}` re-mount on pagination/filter swaps; hamburger menu now slides (180ms cubic-out) over a dim+blur scrim; all reduced-motion-guarded.
+4. **Brand system:** Fraunces italic woff2 self-hosted; `fzr;` = stylized initials of Faiz Ainur Rofiq; violet `--brand` is the single accent (wordmark, underlines, progress bar).
+
+**Verify:** lint/check/tests green; hero + serif titles + fade wrappers confirmed in SSR & compiled CSS.
+
+---
+
 ## Milestone 4 — Markdown engine
 
 **Goal:** `render.ts` pipeline, tested standalone before UI.
@@ -93,7 +123,7 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 1. `posts/[slug]/+page.server.ts`: fetch post, run `render.ts` server-side → `{ html, toc, meta }`.
 2. Layout: `lg:grid` three zones — left metadata rail / main `.prose` column / right sticky TOC (`sticky top-x`, hidden `<lg`).
-3. **Breadcrumb** `Home / Articles / <article title>` rendered below title + description — `text-xs text-muted-foreground`, links `hover:text-foreground`, current crumb not a link (M3.5 review decision).
+3. **Breadcrumb** `Home / Writing / <article title>` rendered below title + description (M3.6 renamed the middle crumb; links `/#writing`) — `text-xs text-muted-foreground`, links `hover:text-foreground`, current crumb not a link (M3.5 review decision).
 4. Inline TOC under title (mobile path), body sections, blockquote style, "Further reading" — **no comments section**.
 5. Client enhancement action on content container: hover-revealed Wrap | Copy icon toolbar on code blocks, `loading=lazy` images, IntersectionObserver active-TOC highlight.
 
@@ -105,9 +135,9 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 **Goal:** Screens 1/5 dialog + mobile triggers.
 
-1. `SearchDialog.svelte`: centered rounded dialog, dim + `backdrop-filter: blur`, pill-zoom transition (raw-CSS exception #3); mobile near-full-width sheet variant via classes only.
+1. `SearchDialog.svelte`: centered rounded dialog (`max-w-2xl`), dim + `backdrop-filter: blur`, dialog-zoom transition (raw-CSS exception #3); mobile sheet via padding; input focused at mount (the `autofocus` attribute no-ops on dynamic dialogs).
 2. Global `Mod+K`/`Ctrl+K` keybind; pill click; mobile icon-button tap.
-3. Debounced (200ms) suggest calls with `AbortController`; result rows (thumbnail/title/preview/date+readTime); Enter/click → navigate; loading skeletons; empty state.
+3. Debounced (200ms) suggest calls guarded by a monotonic request-sequence counter (no AbortSignal in `suggestPosts`); result rows (optional thumbnail/title/preview/date+readTime); Enter/click → navigate; loading skeletons; empty state; see-all hand-off to `/search` (M3.6).
 4. A11y: focus trap, `role="dialog"`, Esc closes, focus restore.
 
 **Verify:** keyboard-only flow works; matches mockup states; abort race test.
@@ -127,9 +157,11 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 ## Milestone 8 — Deploy + BE swap
 
 1. `adapter-node` build → Dockerfile (multi-stage, non-root).
-2. K3s manifest sized to reserved budget (256Mi req / 512Mi limit); `PUBLIC_API_BASE` env.
-3. When real BE is live: set `PUBLIC_API_BASE`, remove mock. **Any other change ⇒ contract drift — fix the API, not the FE.**
-4. RSS link → BE `/feed.xml`.
+2. K3s manifest sized to reserved budget (256Mi req / 512Mi limit); env: `PUBLIC_API_BASE` (in-cluster CMS service URL) + `PUBLIC_SITE_URL` (`https://blog.ainurrofiq.com`).
+3. DNS + ingress for `blog.ainurrofiq.com` (root domain → redirect/landing); wildcard cert `*.ainurrofiq.com` via cert-manager DNS-01. **`cms.` never publicly exposed** (see DESIGN §9).
+4. When real BE is live: point `PUBLIC_API_BASE` at the service, remove mock. **Any other change ⇒ contract drift — fix the API, not the FE.**
+5. RSS link → BE `/feed.xml` (absolute URLs from `PUBLIC_SITE_URL`); add canonical/OG tags at the same time.
+6. Optional: `faizrofiq.com` (available 2026-10-17) as owner/email insurance domain → 301 to the blog.
 
 **Verify:** container runs on cluster; real articles flow end-to-end with no FE code change.
 
@@ -140,4 +172,5 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 - **Shiki language set**: `go, rust, clojure, javascript, typescript, python, bash, yaml, json, dockerfile, hcl` (Terraform). K8s via `yaml`.
 - **Fonts**: Inter (self-hosted variable) + JetBrains Mono for code. Alts if desired: Geist Sans, Atkinson Hyperlegible.
 - **"Selected writing"**: BE-curated; FE renders payload as-is. **General rule: no FE post-processing of any BE data** (articles, list, search, suggestions). TOC extraction remains a rendering step, not data processing.
+  _(Evolved in M3.6: the home "Selected writing" list became the full paginated feed — the no-post-processing rule and BE-curation principle are unchanged: feed order, featured hero photo, and tag sets remain BE decisions.)_
 - **M3.5 round**: 4-link nav (Home/Articles/Gallery/About) + mobile hamburger; contact form removed (spam surface + footer weight); homepage photography demoted to a fixed-height teaser strip (masonry lives on `/gallery`); About is static FE; pagination is Newer/Older, page size 10; article breadcrumb below title/description in M5.
