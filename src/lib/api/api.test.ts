@@ -103,11 +103,3 @@ describe('getPhotos', () => {
 		expect(total).toBeGreaterThan(6);
 	});
 });
-
-describe('sendContact', () => {
-	it('accepts a complete payload', async () => {
-		await expect(
-			mockApi.sendContact({ name: 'A', email: 'a@b.c', message: 'hi' })
-		).resolves.toBeUndefined();
-	});
-});

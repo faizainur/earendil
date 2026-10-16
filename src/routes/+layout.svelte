@@ -1,14 +1,11 @@
 <script lang="ts">
 	import './layout.css';
-	import { page } from '$app/state';
 	import favicon from '#lib/assets/favicon.svg';
 	import Navbar from '#lib/components/Navbar.svelte';
 	import Footer from '#lib/components/Footer.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
-
-	const isHome = $derived(page.url.pathname === '/');
 
 	// Intentionally seed from the server-rendered cookie value; client toggles own the state afterwards.
 	// svelte-ignore state_referenced_locally
@@ -35,6 +32,6 @@
 		<main class="flex flex-1 flex-col gap-12">
 			{@render children()}
 		</main>
-		<Footer contact={isHome} />
+		<Footer />
 	</div>
 </div>

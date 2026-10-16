@@ -11,6 +11,5 @@ export type {
 	PostListResponse,
 	SuggestResponse,
 	Photo,
-	PhotoListResponse,
-	ContactInput
+	PhotoListResponse
 } from './types';

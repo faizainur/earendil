@@ -239,9 +239,5 @@ export const mockApi: BlogApi = {
 
 	async getPhotos({ limit = photos.length } = {}) {
 		return { total: photos.length, items: photos.slice(0, limit) };
-	},
-
-	async sendContact() {
-		// Mock acceptance — the real BE owns validation and persistence.
 	}
 };

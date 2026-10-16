@@ -21,12 +21,6 @@ export interface PhotoListResponse {
 	items: Photo[];
 }
 
-export interface ContactInput {
-	name: string;
-	email: string;
-	message: string;
-}
-
 export interface PostDetail extends PostSummary {
 	tags: string[];
 	content: string;
