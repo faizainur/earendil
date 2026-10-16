@@ -95,7 +95,7 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 2. Layout: `lg:grid` three zones — left metadata rail / main `.prose` column / right sticky TOC (`sticky top-x`, hidden `<lg`).
 3. **Breadcrumb** `Home / Articles / <article title>` rendered below title + description — `text-xs text-muted-foreground`, links `hover:text-foreground`, current crumb not a link (M3.5 review decision).
 4. Inline TOC under title (mobile path), body sections, blockquote style, "Further reading" — **no comments section**.
-5. Client enhancement action on content container: code copy buttons, `loading=lazy` images, IntersectionObserver active-TOC highlight.
+5. Client enhancement action on content container: Wrap | Copy toolbar on code blocks, `loading=lazy` images, IntersectionObserver active-TOC highlight.
 
 **Verify:** matches Screens 2/6; mobile collapses correctly; TOC scroll-sync works.
 

@@ -1,34 +1,59 @@
 /**
  * Client-side enhancement actions for rendered Markdown bodies (DESIGN.md §6.6):
- * copy buttons on `<pre>` blocks, lazy images, and scroll-synced TOC highlighting.
+ * copy + wrap-toggle buttons on `<pre>` blocks, lazy images, and scroll-synced TOC highlighting.
  */
 
-/** Adds a "Copy" pill to every `<pre>`; no-ops when the async clipboard is unavailable. */
-export function copyButtons(node: HTMLElement) {
-	if (!navigator.clipboard) return;
+const pill =
+	'rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium backdrop-blur transition-colors hover:text-foreground';
 
-	const buttons: HTMLButtonElement[] = [];
-	for (const pre of node.querySelectorAll('pre')) {
-		const button = document.createElement('button');
-		button.type = 'button';
-		button.textContent = 'Copy';
-		button.setAttribute('aria-label', 'Copy code to clipboard');
-		button.className =
-			'absolute top-2 right-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground';
-		button.addEventListener('click', () => {
-			navigator.clipboard.writeText(pre.textContent ?? '').then(
-				() => {
-					button.textContent = 'Copied!';
-					setTimeout(() => (button.textContent = 'Copy'), 2000);
-				},
-				() => {
-					/* clipboard rejected (e.g. insecure context) — leave the button idle */
-				}
-			);
+/**
+ * Adds a small toolbar (Wrap | Copy) to every `<pre>`. The Copy button is only
+ * mounted when the async clipboard is available; wrapping works regardless.
+ */
+export function codeBlockTools(node: HTMLElement) {
+	const toolbars: HTMLDivElement[] = [];
+
+	for (const pre of Array.from(node.querySelectorAll('pre'))) {
+		const toolbar = document.createElement('div');
+		toolbar.className = 'absolute top-2 right-2 flex gap-2';
+
+		const wrap = document.createElement('button');
+		wrap.type = 'button';
+		wrap.textContent = 'Wrap';
+		wrap.setAttribute('aria-pressed', 'false');
+		wrap.setAttribute('aria-label', 'Toggle line wrapping for this code block');
+		wrap.className = `${pill} text-muted-foreground`;
+		wrap.addEventListener('click', () => {
+			const on = pre.classList.toggle('code-wrap');
+			wrap.setAttribute('aria-pressed', String(on));
+			wrap.classList.toggle('text-foreground', on);
+			wrap.classList.toggle('text-muted-foreground', !on);
 		});
+		toolbar.appendChild(wrap);
+
+		if (navigator.clipboard) {
+			const copy = document.createElement('button');
+			copy.type = 'button';
+			copy.textContent = 'Copy';
+			copy.setAttribute('aria-label', 'Copy code to clipboard');
+			copy.className = `${pill} text-muted-foreground`;
+			copy.addEventListener('click', () => {
+				navigator.clipboard.writeText(pre.textContent ?? '').then(
+					() => {
+						copy.textContent = 'Copied!';
+						setTimeout(() => (copy.textContent = 'Copy'), 2000);
+					},
+					() => {
+						/* clipboard rejected (e.g. insecure context) — leave the button idle */
+					}
+				);
+			});
+			toolbar.appendChild(copy);
+		}
+
 		pre.classList.add('relative');
-		pre.appendChild(button);
-		buttons.push(button);
+		pre.appendChild(toolbar);
+		toolbars.push(toolbar);
 	}
 
 	for (const img of node.querySelectorAll('img')) {
@@ -37,7 +62,7 @@ export function copyButtons(node: HTMLElement) {
 
 	return {
 		destroy() {
-			for (const button of buttons) button.remove();
+			for (const toolbar of toolbars) toolbar.remove();
 		}
 	};
 }

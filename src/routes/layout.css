@@ -133,6 +133,11 @@
 	padding: 1rem;
 	border-radius: 8px;
 }
+/* Line-wrap toggle (codeBlockTools action): pre-wrap replaces horizontal scrolling. */
+.prose pre.code-wrap {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
 
 @media (prefers-reduced-motion: reduce) {
 	.dialog-zoom {

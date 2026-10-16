@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { copyButtons, tocSpy } from '#lib/actions.ts';
+	import { codeBlockTools, tocSpy } from '#lib/actions.ts';
 	import ArticleTOC from '#lib/components/ArticleTOC.svelte';
 	import type { PageData } from './$types';
 
@@ -66,7 +66,7 @@
 			{/if}
 
 			<!-- Rendered Markdown (DESIGN.md §6.5); enhanced by the actions below. -->
-			<div class="prose mt-10 max-w-none text-base leading-relaxed" use:copyButtons use:tocSpy>
+			<div class="prose mt-10 max-w-none text-base leading-relaxed" use:codeBlockTools use:tocSpy>
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -- HTML is DOMPurify-sanitized in the server Markdown pipeline -->
 				{@html data.html}
 			</div>
