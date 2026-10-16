@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { Menu, Search, X } from 'lucide-svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
+	import SearchDialog from './SearchDialog.svelte';
 
 	interface Props {
 		theme: 'light' | 'dark';
@@ -21,11 +22,27 @@
 		href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href);
 
 	let open = $state(false);
+	let searchOpen = $state(false);
+	let searchTrigger: HTMLElement | null = null;
+
+	function openSearch() {
+		if (searchOpen) return;
+		// Remember the trigger so Esc/backdrop close can restore focus to it.
+		searchTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		searchOpen = true;
+	}
+
+	function closeSearch() {
+		searchOpen = false;
+		searchTrigger?.focus();
+		searchTrigger = null;
+	}
 
 	// Close on navigation.
 	$effect(() => {
 		void page.url.pathname;
 		open = false;
+		searchOpen = false;
 	});
 
 	// Esc closes the menu while it is open.
@@ -33,6 +50,19 @@
 		if (!open) return;
 		const onKey = (e: KeyboardEvent) => {
 			if (e.key === 'Escape') open = false;
+		};
+		window.addEventListener('keydown', onKey);
+		return () => window.removeEventListener('keydown', onKey);
+	});
+
+	// Global Mod+K / Ctrl+K toggles the search palette.
+	$effect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === 'k') {
+				e.preventDefault();
+				if (searchOpen) closeSearch();
+				else openSearch();
+			}
 		};
 		window.addEventListener('keydown', onKey);
 		return () => window.removeEventListener('keydown', onKey);
@@ -71,6 +101,7 @@
 					class="hidden items-center gap-3 rounded-full border border-border px-3 py-2 text-sm
 						text-muted-foreground transition-colors hover:bg-muted md:flex"
 					aria-label="Search"
+					onclick={openSearch}
 				>
 					<Search class="size-4" />
 					<span>Search</span>
@@ -82,6 +113,7 @@
 					class="flex size-8 items-center justify-center rounded-md border border-border
 						text-muted-foreground transition-colors hover:bg-muted md:hidden"
 					aria-label="Search"
+					onclick={openSearch}
 				>
 					<Search class="size-4" />
 				</button>
@@ -131,5 +163,9 @@
 				</a>
 			{/each}
 		</nav>
+	{/if}
+
+	{#if searchOpen}
+		<SearchDialog onClose={closeSearch} />
 	{/if}
 </header>
