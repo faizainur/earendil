@@ -27,6 +27,9 @@
 		>
 			{post.title}
 		</h2>
+		{#if post.subtitle}
+			<p class="text-sm leading-snug text-foreground/70">{post.subtitle}</p>
+		{/if}
 		<p class="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{post.preview}</p>
 		<p class="mt-auto pt-3 text-xs text-muted-foreground">
 			{dateFormatter.format(new Date(post.date))} · {post.readTime} min read

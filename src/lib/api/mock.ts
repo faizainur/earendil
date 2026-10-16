@@ -62,6 +62,7 @@ const posts: PostDetail[] = [
 	{
 		slug: 'shape-of-a-useful-queue',
 		title: 'The shape of a useful queue',
+		subtitle: 'Backpressure, fairness, and the promises hidden between producers and consumers',
 		preview:
 			'A practical look at backpressure, fairness, and the costs hidden between producers and consumers. A queue is less a data structure than a set of promises about what happens when systems disagree about speed — and every new producer quietly renegotiates those promises before the first message is ever enqueued.',
 		date: '2024-05-14',
@@ -116,6 +117,7 @@ curl -s localhost:8080/metrics | grep queue_depth
 	{
 		slug: 'when-latency-becomes-a-product-decision',
 		title: 'When latency becomes a product decision',
+		subtitle: 'Why the p99 is where user trust is actually won or lost',
 		preview:
 			'How tail latency changes architecture, budgets, and what users actually feel. Median response times are a vanity metric; the p99 is where trust is won or lost, and it hides in plain sight until a busy Friday makes it impossible to ignore.',
 		date: '2024-04-02',
@@ -150,6 +152,7 @@ spec:
 	{
 		slug: 'designing-for-the-failure-you-can-see',
 		title: 'Designing for the failure you can see',
+		subtitle: 'Operational habits for systems that fail in familiar ways',
 		preview:
 			'Operational habits for distributed systems that fail in familiar ways. Most outages are not exotic — they are the same three failures rehearsed under different lighting, and teams that survive them treat predictability as a feature you build, not luck you wait for.',
 		date: '2024-02-18',
@@ -178,6 +181,7 @@ Chaos drills earn their keep not by finding new bugs but by checking that the ol
 	{
 		slug: 'a-small-field-guide-to-idempotency',
 		title: 'A small field guide to idempotency',
+		subtitle: 'Retries are easy; making them safe is the real interface',
 		preview:
 			'Retries are easy. Making them safe is the real interface. An at-least-once world without idempotency keys is just a distributed double-charge machine, patiently waiting for the network to have a bad afternoon.',
 		date: '2024-01-09',
@@ -213,6 +217,7 @@ function summarize(post: PostDetail): PostSummary {
 	return {
 		slug: post.slug,
 		title: post.title,
+		subtitle: post.subtitle,
 		preview: post.preview,
 		date: post.date,
 		readTime: post.readTime,

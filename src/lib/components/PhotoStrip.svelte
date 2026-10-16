@@ -8,7 +8,7 @@
 	let { photos }: Props = $props();
 </script>
 
-<section id="photography" class="flex flex-col gap-6">
+<section id="photography" class="mx-auto flex w-full max-w-3xl flex-col gap-6">
 	<div class="border-t border-border pt-4">
 		<p class="text-sm font-medium text-muted-foreground">Photography</p>
 	</div>
