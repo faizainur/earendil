@@ -138,9 +138,10 @@
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
-/* Touch devices have no hover — keep the code toolbar always revealed there. */
+/* Touch devices have no hover — keep the code toolbar + heading anchors always revealed there. */
 @media (hover: none) {
-	.prose .code-tools {
+	.prose .code-tools,
+	.prose .heading-anchor {
 		opacity: 1;
 	}
 }

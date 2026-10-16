@@ -1,7 +1,52 @@
 /**
  * Client-side enhancement actions for rendered Markdown bodies (DESIGN.md §6.6):
- * copy + wrap-toggle buttons on `<pre>` blocks, lazy images, and scroll-synced TOC highlighting.
+ * copy + wrap-toggle buttons on `<pre>` blocks, heading anchor copy-links,
+ * lazy images, and scroll-synced TOC highlighting.
  */
+
+/**
+ * Adds a "#" copy-link button to the left of every h2/h3 with an id (set by
+ * markdown-it-anchor). Hidden until the heading is hovered or focused — same
+ * 100ms fade language as the code toolbar; pointer clicks blur so hover-out
+ * reveals cleanly again. No-ops when the async clipboard is unavailable.
+ */
+export function headingAnchors(node: HTMLElement) {
+	if (!navigator.clipboard) return;
+
+	const buttons: HTMLAnchorElement[] = [];
+
+	for (const heading of Array.from(node.querySelectorAll<HTMLElement>('h2[id], h3[id]'))) {
+		const button = document.createElement('a');
+		button.href = `#${heading.id}`;
+		button.textContent = '#';
+		button.setAttribute('aria-label', `Copy link to section: ${heading.textContent ?? ''}`);
+		button.className =
+			'heading-anchor absolute -left-5 top-0 flex size-5 items-center justify-center rounded text-sm font-medium text-muted-foreground opacity-0 transition-opacity duration-100 ease-out hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100';
+		button.addEventListener('click', (e) => {
+			e.preventDefault();
+			const url = `${location.origin}${location.pathname}#${heading.id}`;
+			navigator.clipboard.writeText(url).then(
+				() => {
+					button.innerHTML = CHECK_ICON;
+					setTimeout(() => (button.textContent = '#'), 2000);
+				},
+				() => {
+					/* clipboard rejected — leave idle */
+				}
+			);
+			if (e.detail > 0) button.blur();
+		});
+		heading.classList.add('relative', 'group');
+		heading.appendChild(button);
+		buttons.push(button);
+	}
+
+	return {
+		destroy() {
+			for (const button of buttons) button.remove();
+		}
+	};
+}
 
 const pill =
 	'flex size-7 items-center justify-center rounded-full border border-border bg-background/80 backdrop-blur transition-colors hover:text-foreground';
