@@ -84,7 +84,7 @@ GET /api/photos                    → { total, items: Photo[] }        // full 
 PostSummary = {
   slug: string
   title: string
-  preview: string        // 1–2 lines
+  preview: string        // BE-owned display text (article opening ok); FE line-clamps visually
   date: string           // ISO
   readTime: number       // minutes
   thumbnail: string | null   // null ⇒ list rows render title + preview only
@@ -132,15 +132,15 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 ## 8. Responsive matrix
 
-| Area           | Mobile `< md`/`< lg`                                                                | Desktop                                                         |
-| -------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Container      | `px-4/6` gutters                                                                    | 1120px centered, generous margins                               |
-| Navbar search  | icon-only rounded-square button                                                     | pill + label + `Mod+K` kbd                                      |
-| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden                       | meta rail / main / sticky TOC grid                              |
-| Search dialog  | `inset-x-3` sheet                                                                   | centered `max-w-xl` card                                        |
-| Home list      | flex row: text column + small right thumbnail when present, meta inline under title | same, wider gaps; text capped ~`max-w-2xl`, thumbnail `size-32` |
-| Photography    | home: horizontal strip; `/gallery`: 2-col masonry                                   | home: horizontal strip; `/gallery`: 3-col masonry               |
-| Footer         | wraps/stacks                                                                        | single constrained row                                          |
+| Area           | Mobile `< md`/`< lg`                                                                | Desktop                                                                  |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Container      | `px-4/6` gutters                                                                    | 1120px centered, generous margins                                        |
+| Navbar search  | icon-only rounded-square button                                                     | pill + label + `Mod+K` kbd                                               |
+| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden                       | meta rail / main / sticky TOC grid                                       |
+| Search dialog  | `inset-x-3` sheet                                                                   | centered `max-w-xl` card                                                 |
+| Home list      | flex row: text column + small right thumbnail when present, meta inline under title | condensed centered column (`max-w-3xl`); preview clamps to 3 lines (`…`) |
+| Photography    | home: horizontal strip; `/gallery`: 2-col masonry                                   | home: horizontal strip; `/gallery`: 3-col masonry                        |
+| Footer         | wraps/stacks                                                                        | single constrained row                                                   |
 
 Rules: consistent `md`/`lg` breakpoints; differences handled with visibility variants (`hidden md:flex` pill ↔ `md:hidden` icon button, `hidden lg:grid` rails), **never** duplicate mobile/desktop components except where markup genuinely differs. Touch targets ≥44px. QA against all 8 screens (light/dark automatic via tokens; desktop/mobile via variants).
 
