@@ -1,5 +1,4 @@
 <script lang="ts">
-	import PhotoStrip from '#lib/components/PhotoStrip.svelte';
 	import PostCard from '#lib/components/PostCard.svelte';
 	import SectionLabel from '#lib/components/SectionLabel.svelte';
 	import type { PageData } from './$types';
@@ -9,6 +8,8 @@
 	}
 
 	let { data }: Props = $props();
+
+	const PAGE_SIZE = 10;
 </script>
 
 <!-- Hero: display serif headline, "currently" line, featured photograph -->
@@ -72,20 +73,47 @@
 	{/if}
 </section>
 
-<!-- Selected writing -->
-<section
-	id="writing"
-	class="fade-up mx-auto flex w-full max-w-3xl flex-col gap-6 [animation-delay:120ms]"
->
-	<SectionLabel title="Selected writing" />
+<!-- Writing: the full list, paginated — /articles and /search reuse these rows -->
+<section id="writing" class="fade-up mx-auto flex w-full max-w-3xl flex-col gap-6">
+	<SectionLabel title="Writing" />
 	<div>
 		{#each data.posts as post, i (post.slug)}
-			<PostCard {post} index={i + 1} />
+			<PostCard {post} index={(data.page - 1) * PAGE_SIZE + i + 1} />
 		{/each}
 	</div>
-</section>
 
-<!-- Photography teaser -->
-<div class="fade-up [animation-delay:240ms]">
-	<PhotoStrip photos={data.photos} />
-</div>
+	{#if data.posts.length === 0}
+		<p class="py-6 text-sm text-muted-foreground">Nothing published yet.</p>
+	{:else if data.pages > 1}
+		<nav
+			class="flex items-center justify-between text-sm text-muted-foreground"
+			aria-label="Pagination"
+		>
+			{#if data.page > 1}
+				<a
+					href="/?page={data.page - 1}"
+					rel="prev"
+					class="font-medium text-primary transition-colors hover:text-foreground"
+				>
+					← Newer
+				</a>
+			{:else}
+				<span aria-hidden="true" class="opacity-40">← Newer</span>
+			{/if}
+
+			<p>Page {data.page} of {data.pages}</p>
+
+			{#if data.page < data.pages}
+				<a
+					href="/?page={data.page + 1}"
+					rel="next"
+					class="font-medium text-primary transition-colors hover:text-foreground"
+				>
+					Older →
+				</a>
+			{:else}
+				<span aria-hidden="true" class="opacity-40">Older →</span>
+			{/if}
+		</nav>
+	{/if}
+</section>

@@ -35,7 +35,7 @@
 				{#if data.post.tags.length > 0}
 					<div class="flex flex-wrap gap-1.5 border-t border-border pt-4">
 						{#each data.post.tags as tag (tag)}
-							<a href="/articles?tag={encodeURIComponent(tag)}" class={chip}>{tag}</a>
+							<a href="/search?tag={encodeURIComponent(tag)}" class={chip}>{tag}</a>
 						{/each}
 					</div>
 				{/if}
@@ -55,7 +55,7 @@
 			>
 				<a href="/" class="transition-colors hover:text-foreground">Home</a>
 				<span aria-hidden="true">/</span>
-				<a href="/articles" class="transition-colors hover:text-foreground">Articles</a>
+				<a href="/#writing" class="transition-colors hover:text-foreground">Writing</a>
 				<span aria-hidden="true">/</span>
 				<span class="text-foreground">{data.post.title}</span>
 			</nav>
@@ -73,7 +73,7 @@
 				<span aria-hidden="true">·</span>
 				<span>{data.post.readTime} min read<span class="text-brand">;</span></span>
 				{#each data.post.tags as tag (tag)}
-					<a href="/articles?tag={encodeURIComponent(tag)}" class={chip}>{tag}</a>
+					<a href="/search?tag={encodeURIComponent(tag)}" class={chip}>{tag}</a>
 				{/each}
 			</div>
 			{#if data.toc.length > 0}

@@ -26,6 +26,7 @@
 	let selected = $state(0);
 	let card = $state<HTMLDivElement | undefined>();
 	let rowEls = $state<(HTMLAnchorElement | undefined)[]>([]);
+	let seeAllEl: HTMLAnchorElement | undefined = $state();
 
 	// suggestPosts() takes no AbortSignal, so a monotonic request sequence
 	// supersedes older queries instead: any response whose sequence is no
@@ -60,10 +61,17 @@
 		}
 	}
 
-	// Keep keyboard selection visible inside the scrollable results area.
+	// Keyboard selection covers the suggestion rows plus the trailing
+	// "see all results" row (index === results.length).
 	$effect(() => {
-		rowEls[selected]?.scrollIntoView({ block: 'nearest' });
+		(selected >= results.length ? seeAllEl : rowEls[selected])?.scrollIntoView({
+			block: 'nearest'
+		});
 	});
+
+	const seeAllHref = $derived(
+		query.trim() ? `/search?q=${encodeURIComponent(query.trim())}` : '/search'
+	);
 
 	// Esc closes while the dialog is mounted (shared behavior with ImageLightbox).
 	$effect(() => {
@@ -100,16 +108,18 @@
 	});
 
 	function onInputKeydown(e: KeyboardEvent) {
+		const max = results.length; // results.length === the "see all" pseudo-row
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
-			if (results.length > 0) selected = Math.min(selected + 1, results.length - 1);
+			if (query.trim()) selected = Math.min(selected + 1, max);
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
-			if (results.length > 0) selected = Math.max(selected - 1, 0);
+			selected = Math.max(selected - 1, 0);
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
 			const post = results[selected];
 			if (post) void goto(`/posts/${post.slug}`);
+			else if (query.trim()) void goto(seeAllHref);
 		}
 	}
 </script>
@@ -158,8 +168,8 @@
 			{:else if !query.trim()}
 				<p class="px-3 py-6 text-sm text-muted-foreground">Type to search…</p>
 			{:else if results.length === 0}
-				<p class="px-3 py-6 text-sm text-muted-foreground">
-					No results for "{query.trim()}"
+				<p class="px-3 py-3 text-sm text-muted-foreground">
+					No results for &ldquo;{query.trim()}&rdquo;
 				</p>
 			{:else}
 				{#each results as post, i (post.slug)}
@@ -188,6 +198,19 @@
 						</span>
 					</a>
 				{/each}
+			{/if}
+
+			{#if query.trim() && !loading}
+				<a
+					bind:this={seeAllEl}
+					href={seeAllHref}
+					class="flex items-center gap-2 rounded-lg px-3 py-3 text-sm transition-colors {selected ===
+					results.length
+						? 'bg-muted font-medium text-foreground'
+						: 'text-muted-foreground hover:bg-muted'}"
+				>
+					→ See all results for &ldquo;{query.trim()}&rdquo;
+				</a>
 			{/if}
 		</div>
 	</div>

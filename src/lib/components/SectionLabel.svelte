@@ -6,8 +6,5 @@
 	let { title }: Props = $props();
 </script>
 
-<div class="border-t border-border pt-4">
-	<p class="font-brand text-sm font-medium text-muted-foreground">
-		{title}<span class="text-brand">;</span>
-	</p>
-</div>
+<!-- Quiet kicker: the rows' own hairlines do the framing; the motif lives elsewhere. -->
+<p class="text-xs font-medium tracking-widest text-muted-foreground uppercase">{title}</p>

@@ -12,7 +12,7 @@
 			: (page.error?.message ?? 'An unexpected error occurred.')}
 	</p>
 	<a
-		href="/articles"
+		href="/"
 		class="font-medium text-primary underline underline-offset-4 transition-colors hover:text-foreground"
 	>
 		← Back to all articles
