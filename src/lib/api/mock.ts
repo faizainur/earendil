@@ -237,8 +237,8 @@ export const mockApi: BlogApi = {
 		return { results };
 	},
 
-	async getPhotos() {
-		return { total: photos.length, items: photos };
+	async getPhotos({ limit = photos.length } = {}) {
+		return { total: photos.length, items: photos.slice(0, limit) };
 	},
 
 	async sendContact() {

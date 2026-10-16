@@ -11,7 +11,7 @@ export interface BlogApi {
 	getPosts(opts?: { offset?: number; limit?: number }): Promise<PostListResponse>;
 	getPost(slug: string): Promise<PostDetail>;
 	suggestPosts(q: string, limit?: number): Promise<SuggestResponse>;
-	getPhotos(): Promise<PhotoListResponse>;
+	getPhotos(opts?: { limit?: number }): Promise<PhotoListResponse>;
 	sendContact(input: ContactInput): Promise<void>;
 }
 
@@ -53,8 +53,11 @@ function createFetchApi(base: string): BlogApi {
 			if (limit !== undefined) params.set('limit', String(limit));
 			return get<SuggestResponse>(`/api/search/suggest?${params}`);
 		},
-		getPhotos() {
-			return get<PhotoListResponse>('/api/photos');
+		getPhotos(opts) {
+			const params = new URLSearchParams();
+			if (opts?.limit !== undefined) params.set('limit', String(opts.limit));
+			const query = params.toString();
+			return get<PhotoListResponse>(`/api/photos${query ? `?${query}` : ''}`);
 		},
 		async sendContact(input) {
 			const res = await fetch(`${base}/api/contact`, {

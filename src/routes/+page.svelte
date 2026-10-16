@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PhotoGallery from '#lib/components/PhotoGallery.svelte';
+	import PhotoStrip from '#lib/components/PhotoStrip.svelte';
 	import PostCard from '#lib/components/PostCard.svelte';
 	import type { PageData } from './$types';
 
@@ -56,5 +56,5 @@
 	</div>
 </section>
 
-<!-- Photography -->
-<PhotoGallery photos={data.photos} />
+<!-- Photography teaser -->
+<PhotoStrip photos={data.photos} />

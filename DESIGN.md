@@ -74,7 +74,8 @@ Content arrives at **runtime from the BE** (not build time). One typed client in
 GET /api/posts?offset&limit        → { total, items: PostSummary[] }
 GET /api/posts/:slug               → { ...PostSummary, tags, content }
 GET /api/search/suggest?q&limit    → { results: PostSummary[] }
-GET /api/photos                    → { total, items: Photo[] }        // homepage photography grid
+GET /api/photos?limit=6            → { total, items: Photo[] }        // homepage teaser strip
+GET /api/photos                    → { total, items: Photo[] }        // full masonry on /gallery
 POST /api/contact                  → 204                               // { name, email, message }
 
 PostSummary = {

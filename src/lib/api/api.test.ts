@@ -96,6 +96,12 @@ describe('getPhotos', () => {
 		const ratios = new Set(items.map((p) => (p.width / p.height).toFixed(2)));
 		expect(ratios.size).toBeGreaterThan(3);
 	});
+
+	it('honors the limit while keeping the full total', async () => {
+		const { total, items } = await mockApi.getPhotos({ limit: 6 });
+		expect(items).toHaveLength(6);
+		expect(total).toBeGreaterThan(6);
+	});
 });
 
 describe('sendContact', () => {
