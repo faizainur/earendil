@@ -1,0 +1,187 @@
+import { ApiError, type BlogApi } from './client';
+import type { PostDetail, PostSummary } from './types';
+
+const thumbnails = [
+	'https://images.unsplash.com/photo-1639322537228-f710d846310a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080',
+	'https://images.unsplash.com/photo-1762163516269-3c143e04175c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
+];
+
+const posts: PostDetail[] = [
+	{
+		slug: 'shape-of-a-useful-queue',
+		title: 'The shape of a useful queue',
+		preview:
+			'A practical look at backpressure, fairness, and the costs hidden between producers and consumers.',
+		date: '2024-05-14',
+		readTime: 8,
+		thumbnail: thumbnails[0],
+		tags: ['distributed-systems', 'queues', 'backpressure'],
+		content: `Queues are not storage with a nicer API. They are a contract between speed, pressure, and time.
+
+## The queue is a promise
+
+A queue absorbs a burst by giving producers and consumers different speeds without pretending that the difference has disappeared. It holds work long enough for a system to make progress at its sustainable rate, turning a sharp arrival pattern into something a worker can handle.
+
+That pause is a contract. When consumers cannot keep up, the queue defines what happens next: work waits, work is dropped, or the producer is asked to slow down. A useful queue makes that decision visible instead of hiding it behind an apparently limitless buffer.
+
+## Backpressure is the feature
+
+Bounded buffers are uncomfortable because they expose the finite nature of the system. Once the buffer fills, the producer has to choose between waiting, retrying, rejecting work, or finding another path. That choice is not an implementation detail; it is the system's response to pressure.
+
+Explicit rejection protects downstream systems from a quiet collapse. It keeps memory use predictable, gives operators a signal they can measure, and lets callers decide whether a request is worth trying again. A queue that never says no is often only postponing the failure.
+
+\`\`\`go
+func (q *Queue) Push(job Job) error {
+	if q.full() {
+		return ErrBackpressure
+	}
+	q.items = append(q.items, job)
+	return nil
+}
+\`\`\`
+
+## Fairness has a cost
+
+FIFO ordering is a clear promise, but it is not always the most useful one. Priority work may need to pass routine work, and once priorities exist, starvation becomes a risk that must be measured and managed. Fairness is a policy with a cost, not a property that appears for free.
+
+> A queue buys time. It does not create capacity.
+
+## A practical checklist
+
+Choose a bound, define the rejection behavior, and make the pressure visible. Decide whether ordering matters more than throughput, then test the queue at the point where consumers fall behind.
+
+\`\`\`bash
+curl -s localhost:8080/metrics | grep queue_depth
+\`\`\`
+
+## Further reading
+
+- [Patterns for distributed systems](https://example.com/distributed-systems)
+- [Notes on reliability and failure](https://example.com/reliability)
+- [Load shedding in practice](https://example.com/load-shedding)
+`
+	},
+	{
+		slug: 'when-latency-becomes-a-product-decision',
+		title: 'When latency becomes a product decision',
+		preview: 'How tail latency changes architecture, budgets, and what users actually feel.',
+		date: '2024-04-02',
+		readTime: 11,
+		thumbnail: thumbnails[1],
+		tags: ['latency', 'performance', 'product'],
+		content: `Average latency is a number; tail latency is an experience. Once a request leaves the analyst's chart and reaches a person, its cost stops being measured in milliseconds and starts being measured in trust.
+
+## The user never sees the mean
+
+A service that answers in 40ms most of the time and in four seconds on its worst day will be remembered for the worst day. Percentiles are not a reporting convenience; they are how the product actually behaves.
+
+## Deciding where the budget goes
+
+Pushing the tail down usually means spending somewhere else: redundancy, caching, prefetching, or simply doing less per request. The interesting question is not how to be fast but which slowness users can live with.
+
+> Latency budgets are product decisions that engineers execute on.
+
+## Consequences for architecture
+
+Once the tail is the contract, fan-out gets cheaper than round trips, timeouts become design material, and a request that can say "not now" is more honest than one that promises to be on time.
+
+\`\`\`yaml
+apiVersion: monitoring.googleapis.com/v1
+kind: UptimeCheck
+spec:
+  period: 60s
+  timeout: 2s
+\`\`\`
+`
+	},
+	{
+		slug: 'designing-for-the-failure-you-can-see',
+		title: 'Designing for the failure you can see',
+		preview: 'Operational habits for distributed systems that fail in familiar ways.',
+		date: '2024-02-18',
+		readTime: 7,
+		thumbnail: thumbnails[0],
+		tags: ['operations', 'observability', 'incident-response'],
+		content: `Systems rarely fail in the abstract. They fail at a component you named, at an hour you can find in a log, in a way that left a trace the week before. Designing for failure mostly means making those traces easy to find.
+
+## Fail in familiar ways
+
+A small set of boring, well-understood failure modes beats a large set of surprising ones. Bounded retries, explicit timeouts, and loud rejections shrink the space an investigator has to search.
+
+## Instruments before dashboards
+
+A metric nobody queried during the last incident is decoration. Prefer the humble signal that answers the question the runbook actually asks.
+
+\`\`\`bash
+journalctl -u orders-api --since "-30min" | grep -c 'context deadline exceeded'
+\`\`\`
+
+## Rehearse the boring failure
+
+Chaos drills earn their keep not by finding new bugs but by checking that the old, known ones still behave the way the runbook claims.
+`
+	},
+	{
+		slug: 'a-small-field-guide-to-idempotency',
+		title: 'A small field guide to idempotency',
+		preview: 'Retries are easy. Making them safe is the real interface.',
+		date: '2024-01-09',
+		readTime: 6,
+		thumbnail: thumbnails[1],
+		tags: ['api-design', 'idempotency', 'retries'],
+		content: `A client that retries is making a promise: "this request should happen exactly once, even though I sent it twice." The server is the one that has to keep that promise.
+
+## Keys, not intentions
+
+Idempotency lives in the data, not in the naming. An idempotency key the server stores and compares gives a retry something to match against; a header called X-Retry does not.
+
+\`\`\`go
+if existing, ok := store.Get(req.IdempotencyKey); ok {
+	return existing, nil // the retry gets the original answer
+}
+\`\`\`
+
+## The response must be replayable too
+
+Storing the key without the result is half a contract. Safe retries need the same answer, not merely the absence of a second side effect.
+
+> Idempotency is not a property of a single handler; it is a property of the protocol between client and server.
+
+## Start with the read models
+
+GETs are already idempotent, and most teams underestimate how much traffic can move to a fresh read replica instead of a retried write.
+`
+	}
+];
+
+function summarize(post: PostDetail): PostSummary {
+	return {
+		slug: post.slug,
+		title: post.title,
+		preview: post.preview,
+		date: post.date,
+		readTime: post.readTime,
+		thumbnail: post.thumbnail
+	};
+}
+
+export const mockApi: BlogApi = {
+	async getPosts({ offset = 0, limit = posts.length } = {}) {
+		return { total: posts.length, items: posts.slice(offset, offset + limit).map(summarize) };
+	},
+
+	async getPost(slug) {
+		const post = posts.find((p) => p.slug === slug);
+		if (!post) throw new ApiError(404, `post not found: ${slug}`);
+		return post;
+	},
+
+	async suggestPosts(q, limit = 5) {
+		const needle = q.toLowerCase();
+		const results = posts
+			.filter((p) => `${p.title} ${p.preview}`.toLowerCase().includes(needle))
+			.slice(0, limit)
+			.map(summarize);
+		return { results };
+	}
+};
