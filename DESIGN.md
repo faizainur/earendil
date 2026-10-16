@@ -11,7 +11,7 @@
 | Framework          | **Svelte 5 + SvelteKit** (TypeScript, Vite)                                                                        | Small bundle, great interactions (search palette), file-based routing, SSR                                              |
 | Fonts              | **Inter** (variable, self-hosted `@fontsource-variable/inter`) + **JetBrains Mono** (`@fontsource/jetbrains-mono`) | Closest free match to mockup grotesque; self-hosted = no external request/FOUT. Alts: Geist Sans, Atkinson Hyperlegible |
 | Rendering          | **SSR** via `adapter-node`                                                                                         | SEO (articles crawlable), server-side API fetch in load functions, fits K3s 256/512Mi backend container budget          |
-| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                          | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~3 exceptions, §7)                            |
+| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                          | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~4 exceptions, §7)                            |
 | Markdown           | **markdown-it** + `markdown-it-anchor` (+ tables/strikethrough/task-lists)                                         | Runtime content from API ⇒ mdsvex (build-time) is not applicable; token access powers TOC/anchors                       |
 | Sanitization       | **DOMPurify** (`isomorphic-dompurify`, server-side)                                                                | Mandatory — API content treated as untrusted                                                                            |
 | Code highlighting  | **Shiki, server-side**, dual-theme mode (`themes: { light, dark }`)                                                | VS Code-grade grammars; client ships plain highlighted HTML; theme flips via CSS vars without refetch                   |
@@ -20,16 +20,20 @@
 
 ## 2. Pages & Layout
 
-| Route           | Content                                                                                                                                                                               | Screens             |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `/`             | Greeting, headline, "Selected writing" list (**BE-curated**; FE renders payload as-is, no sorting/derivation), minimal footer. **No hero search field** — search lives only in navbar | 1 (light), 5 (dark) |
-| `/posts/[slug]` | Title, metadata, inline TOC below title, body sections, quote, "Further reading". **No comments/Discussion section**                                                                  | 2 (light), 6 (dark) |
-| (future)        | About, RSS redirect to BE `/feed.xml`                                                                                                                                                 | —                   |
+| Route           | Content                                                                                                                                                                                                                                                                                   | Screens             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `/`             | Greeting + headline (decorative line-art SVG right on desktop), "Selected writing" list with optional thumbnails (**BE-curated**; FE renders payload as-is), "Photography" teaser strip (fixed-height crops, links to `/gallery`). **No hero search field** — search lives only in navbar | 1 (light), 5 (dark) |
+| `/articles`     | All articles, SSR-paginated (`?page=N`, size 10, Newer/Older + "Page X of Y"); **card grid** (`sm:2 lg:3` cols, `ArticleCard`) — top `aspect-video` thumbnail when present, title, clamped preview, meta pinned bottom. Homepage keeps the editorial list rows (`PostCard`)               | —                   |
+| `/gallery`      | Full mixed-aspect masonry grid (`columns-2 md:columns-3`, lazy, reserved dimensions) — the interesting mis-aligned rows live here, not on the homepage                                                                                                                                    | —                   |
+| `/about`        | Static FE bio page (hero-style header + paragraphs); trivially movable to BE-driven later                                                                                                                                                                                                 | —                   |
+| `/posts/[slug]` | Title + description, breadcrumb below (`Home / Articles / <title>`), metadata, inline TOC, body sections, quote, "Further reading". **No comments/Discussion section**                                                                                                                    | 2 (light), 6 (dark) |
+| (future)        | RSS redirect to BE `/feed.xml`                                                                                                                                                                                                                                                            | —                   |
 
 Layout shell (all pages):
 
 - **Container**: centered `max-w-page` (1120px) with generous equal side margins; content never stretches to full viewport. Mobile: `px-4`/`px-6` gutters.
-- **Navbar**: wordmark (minimal) + navigation + **Search pill** + **Theme toggle**.
+- **Navbar**: wordmark (minimal) + **4 links (Home · Articles · Gallery · About)** with pathname-derived active state (`aria-current="page"`) + **Search pill** + **Theme toggle**.
+- **Mobile nav**: links collapse into a **hamburger** (`md:hidden`); icon button toggles a dropdown panel under the header with stacked links; closes on link click, `Esc`, outside tap, and on navigation; `aria-expanded`/`aria-controls`.
 - **Search pill (desktop)**: bordered rounded pill, magnifier icon, label "Search", visible `Mod+K` kbd hint.
 - **Search (mobile)**: compact bordered **rounded-square icon-only button** (magnifier only; no label, no kbd hint). Pill hidden on mobile; icon button hidden on desktop. Icon button + theme toggle fit on one mobile header row, ≥44px touch targets.
 - **Theme toggle**: bordered rounded button beside search; **sun icon in light state, moon icon in dark state**.
@@ -71,23 +75,22 @@ Article page zones (desktop ≥ lg): left **metadata rail** (date, read time, ta
 Content arrives at **runtime from the BE** (not build time). One typed client interface; mock vs real swapped by `PUBLIC_API_BASE` env — swapping to the real BE must require zero other FE changes.
 
 ```
-GET /api/posts?offset&limit
-  → { total, items: PostSummary[] }
-
-GET /api/posts/:slug
-  → { ...PostSummary, tags: string[], content: string /* raw Markdown */ }
-
-GET /api/search/suggest?q&limit
-  → { results: PostSummary[] }        // 1–2 line preview each
+GET /api/posts?offset&limit        → { total, items: PostSummary[] }
+GET /api/posts/:slug               → { ...PostSummary, tags, content }
+GET /api/search/suggest?q&limit    → { results: PostSummary[] }
+GET /api/photos?limit=6            → { total, items: Photo[] }        // homepage teaser strip
+GET /api/photos                    → { total, items: Photo[] }        // full masonry on /gallery
 
 PostSummary = {
   slug: string
   title: string
-  preview: string                      // 1–2 lines
-  date: string                         // ISO
-  readTime: number                     // minutes
-  thumbnail: string                    // image URL
+  preview: string        // 1–2 lines
+  date: string           // ISO
+  readTime: number       // minutes
+  thumbnail: string | null   // null ⇒ list rows render title + preview only
 }
+
+Photo = { src, alt, width, height }   // natural dimensions; mixed aspect ratios on purpose
 ```
 
 Rules:
@@ -124,18 +127,20 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
-3. Pill-zoom keyframes/transition for the search dialog.
+3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the future search dialog.
+4. Slim themed horizontal scrollbar (`.scroll-slim`) for the homepage photo strip — pseudo-elements aren't reachable via utilities.
 
 ## 8. Responsive matrix
 
-| Area           | Mobile `< md`/`< lg`                                          | Desktop                            |
-| -------------- | ------------------------------------------------------------- | ---------------------------------- |
-| Container      | `px-4/6` gutters                                              | 1120px centered, generous margins  |
-| Navbar search  | icon-only rounded-square button                               | pill + label + `Mod+K` kbd         |
-| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden | meta rail / main / sticky TOC grid |
-| Search dialog  | `inset-x-3` sheet                                             | centered `max-w-xl` card           |
-| Home list      | stacked cards, smaller thumbnails                             | list rows                          |
-| Footer         | wraps/stacks                                                  | single constrained row             |
+| Area           | Mobile `< md`/`< lg`                                          | Desktop                                           |
+| -------------- | ------------------------------------------------------------- | ------------------------------------------------- |
+| Container      | `px-4/6` gutters                                              | 1120px centered, generous margins                 |
+| Navbar search  | icon-only rounded-square button                               | pill + label + `Mod+K` kbd                        |
+| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden | meta rail / main / sticky TOC grid                |
+| Search dialog  | `inset-x-3` sheet                                             | centered `max-w-xl` card                          |
+| Home list      | stacked rows, inline meta; thumbnail above title when present | 12-col rows; optional thumbnail column            |
+| Photography    | home: horizontal strip; `/gallery`: 2-col masonry             | home: horizontal strip; `/gallery`: 3-col masonry |
+| Footer         | wraps/stacks                                                  | single constrained row                            |
 
 Rules: consistent `md`/`lg` breakpoints; differences handled with visibility variants (`hidden md:flex` pill ↔ `md:hidden` icon button, `hidden lg:grid` rails), **never** duplicate mobile/desktop components except where markup genuinely differs. Touch targets ≥44px. QA against all 8 screens (light/dark automatic via tokens; desktop/mobile via variants).
 

@@ -26,10 +26,10 @@
 	{@html `<script>document.documentElement.dataset.theme="${data.theme}"</script>`}
 </svelte:head>
 
-<div class="min-h-svh bg-background text-foreground">
+<div class="flex min-h-svh flex-col bg-background text-foreground">
 	<Navbar {theme} onToggle={toggleTheme} />
-	<div class="mx-auto flex w-full max-w-page flex-col gap-12 px-5 py-12 md:px-8">
-		<main class="flex flex-col gap-12">
+	<div class="mx-auto flex w-full max-w-page grow flex-col gap-12 px-5 py-12 md:px-8">
+		<main class="flex flex-1 flex-col gap-12">
 			{@render children()}
 		</main>
 		<Footer />

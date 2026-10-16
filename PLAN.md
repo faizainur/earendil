@@ -46,7 +46,27 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 3. Greeting + headline per mockup.
 4. Light/dark + responsive QA (stacked mobile cards).
 
+**Review pass (2026-10-16):** footer sticks to bottom on short pages (flex-grow main); optional post thumbnails in list (null ⇒ title + preview only); hero gains decorative SVG on the right (desktop); new "Photography" section — CSS-columns masonry for mixed aspect ratios (`GET /api/photos`); homepage footer gains a contact form (`POST /api/contact` via SvelteKit form action) — superseded by Milestone 3.5.
+
 **Verify:** view-source shows SSR'd content; matches Screens 1 & 5.
+
+---
+
+## Milestone 3.5 — Home curation + pages
+
+**Goal:** writing-first homepage; nav = Home · Articles · Gallery · About; `/articles`, `/gallery`, `/about` exist; contact form removed. One commit, stacked on `milestone/3-homepage`.
+
+1. **Navbar:** exactly 4 links — Home `/`, Articles `/articles`, Gallery `/gallery`, About `/about`; drop "Now"; active link emphasized via `$app/state` pathname (`font-medium text-foreground` vs `text-muted-foreground`).
+2. **Mobile nav = hamburger:** `md:hidden` icon button opens a dropdown panel under the header with stacked links; closes on link click, `Esc`, and outside tap; `aria-expanded`/`aria-controls`; auto-closes on `page.url` change. No drawer/portal.
+3. **Home photography → teaser strip:** one row of `h-28 md:h-32` fixed-height `object-cover` crops, `overflow-x-auto` + scroll-snap, fed by `getPhotos({ limit: 6 })`; ends with "Full gallery →" link. The full mixed-aspect masonry moves to `/gallery` — homepage stays calm, writing leads.
+4. **Remove the contact form:** delete `ContactForm.svelte`, the `contact` form action, `sendContact()` (client/mock/types), and the `destructive` color token. Footer minimal (© + links) on every page.
+5. **`/articles`:** SSR pagination — `?page=N` → `getPosts({ offset: (N-1)*10, limit: 10 })`; reuses `PostCard`; Newer/Older plain links + "Page X of Y" (page size 10).
+6. **`/gallery`:** full masonry (`columns-2 md:columns-3`, `break-inside-avoid`), lazy images with reserved dimensions.
+7. **`/about`:** static FE page using the existing hero bio copy; trivially movable to BE-driven later.
+
+**Verify:** new unit test — mock `getPhotos` honors `limit`; `svelte-check` 0/0, lint, unit, build green; curl-SSR `/articles` (`?page=2` slicing + pagination links) and `/gallery` (masonry images); hamburger closes on Esc/outside-tap/navigate; nav active-state correct on all 4 routes.
+
+**Contract delta (reflect in DESIGN.md when implementing):** `GET /api/photos?limit=6` (optional `limit`; gallery calls without) — **`POST /api/contact` REMOVED**.
 
 ---
 
@@ -73,8 +93,9 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 1. `posts/[slug]/+page.server.ts`: fetch post, run `render.ts` server-side → `{ html, toc, meta }`.
 2. Layout: `lg:grid` three zones — left metadata rail / main `.prose` column / right sticky TOC (`sticky top-x`, hidden `<lg`).
-3. Inline TOC under title (mobile path), body sections, blockquote style, "Further reading" — **no comments section**.
-4. Client enhancement action on content container: code copy buttons, `loading=lazy` images, IntersectionObserver active-TOC highlight.
+3. **Breadcrumb** `Home / Articles / <article title>` rendered below title + description — `text-xs text-muted-foreground`, links `hover:text-foreground`, current crumb not a link (M3.5 review decision).
+4. Inline TOC under title (mobile path), body sections, blockquote style, "Further reading" — **no comments section**.
+5. Client enhancement action on content container: code copy buttons, `loading=lazy` images, IntersectionObserver active-TOC highlight.
 
 **Verify:** matches Screens 2/6; mobile collapses correctly; TOC scroll-sync works.
 
@@ -119,3 +140,4 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 - **Shiki language set**: `go, rust, clojure, javascript, typescript, python, bash, yaml, json, dockerfile, hcl` (Terraform). K8s via `yaml`.
 - **Fonts**: Inter (self-hosted variable) + JetBrains Mono for code. Alts if desired: Geist Sans, Atkinson Hyperlegible.
 - **"Selected writing"**: BE-curated; FE renders payload as-is. **General rule: no FE post-processing of any BE data** (articles, list, search, suggestions). TOC extraction remains a rendering step, not data processing.
+- **M3.5 round**: 4-link nav (Home/Articles/Gallery/About) + mobile hamburger; contact form removed (spam surface + footer weight); homepage photography demoted to a fixed-height teaser strip (masonry lives on `/gallery`); About is static FE; pagination is Newer/Older, page size 10; article breadcrumb below title/description in M5.

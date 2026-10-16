@@ -1,9 +1,61 @@
 import { ApiError, type BlogApi } from './client';
-import type { PostDetail, PostSummary } from './types';
+import type { Photo, PostDetail, PostSummary } from './types';
 
 const thumbnails = [
 	'https://images.unsplash.com/photo-1639322537228-f710d846310a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080',
 	'https://images.unsplash.com/photo-1762163516269-3c143e04175c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'
+];
+
+// Mixed landscape/street fixtures with varied aspect ratios to exercise the masonry grid.
+const photos: Photo[] = [
+	{
+		src: 'https://picsum.photos/seed/alpine-dawn/900/560',
+		alt: 'Alpine ridgeline at dawn',
+		width: 900,
+		height: 560
+	},
+	{
+		src: 'https://picsum.photos/seed/rainy-crosswalk/560/840',
+		alt: 'Rainy crosswalk under neon',
+		width: 560,
+		height: 840
+	},
+	{
+		src: 'https://picsum.photos/seed/coast-fog/800/800',
+		alt: 'Fog rolling over a coastline',
+		width: 800,
+		height: 800
+	},
+	{
+		src: 'https://picsum.photos/seed/desert-panorama/1200/500',
+		alt: 'Desert highway panorama',
+		width: 1200,
+		height: 500
+	},
+	{
+		src: 'https://picsum.photos/seed/metro-platform/520/780',
+		alt: 'Empty metro platform at night',
+		width: 520,
+		height: 780
+	},
+	{
+		src: 'https://picsum.photos/seed/lakeside-dusk/840/580',
+		alt: 'Lakeside at dusk',
+		width: 840,
+		height: 580
+	},
+	{
+		src: 'https://picsum.photos/seed/old-town-alley/600/900',
+		alt: 'Narrow old-town alley',
+		width: 600,
+		height: 900
+	},
+	{
+		src: 'https://picsum.photos/seed/forest-stream/820/620',
+		alt: 'Stream cutting through forest',
+		width: 820,
+		height: 620
+	}
 ];
 
 const posts: PostDetail[] = [
@@ -100,7 +152,7 @@ spec:
 		preview: 'Operational habits for distributed systems that fail in familiar ways.',
 		date: '2024-02-18',
 		readTime: 7,
-		thumbnail: thumbnails[0],
+		thumbnail: null,
 		tags: ['operations', 'observability', 'incident-response'],
 		content: `Systems rarely fail in the abstract. They fail at a component you named, at an hour you can find in a log, in a way that left a trace the week before. Designing for failure mostly means making those traces easy to find.
 
@@ -127,7 +179,7 @@ Chaos drills earn their keep not by finding new bugs but by checking that the ol
 		preview: 'Retries are easy. Making them safe is the real interface.',
 		date: '2024-01-09',
 		readTime: 6,
-		thumbnail: thumbnails[1],
+		thumbnail: null,
 		tags: ['api-design', 'idempotency', 'retries'],
 		content: `A client that retries is making a promise: "this request should happen exactly once, even though I sent it twice." The server is the one that has to keep that promise.
 
@@ -183,5 +235,9 @@ export const mockApi: BlogApi = {
 			.slice(0, limit)
 			.map(summarize);
 		return { results };
+	},
+
+	async getPhotos({ limit = photos.length } = {}) {
+		return { total: photos.length, items: photos.slice(0, limit) };
 	}
 };

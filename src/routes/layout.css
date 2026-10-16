@@ -50,3 +50,39 @@
 		color: var(--foreground);
 	}
 }
+
+/* Slim themed horizontal scrollbar for the homepage photo strip (utilities can't reach ::-webkit-*). */
+.scroll-slim {
+	scrollbar-width: thin;
+	scrollbar-color: var(--border) transparent;
+}
+.scroll-slim::-webkit-scrollbar {
+	height: 6px;
+}
+.scroll-slim::-webkit-scrollbar-track {
+	background: transparent;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+	background: var(--border);
+	border-radius: 9999px;
+}
+.scroll-slim::-webkit-scrollbar-thumb:hover {
+	background: var(--muted-foreground);
+}
+
+/* Dialog/lightbox entrance — shared pattern with the future search palette (DESIGN.md §5). */
+@keyframes zoom-in {
+	from {
+		opacity: 0;
+		transform: scale(0.94);
+	}
+}
+.dialog-zoom {
+	animation: zoom-in 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dialog-zoom {
+		animation: none;
+	}
+}
