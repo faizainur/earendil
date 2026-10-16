@@ -7,46 +7,66 @@
 	}
 
 	let { data }: Props = $props();
+
+	const tagQs = $derived(data.tag ? `&tag=${encodeURIComponent(data.tag)}` : '');
 </script>
 
 <section class="flex flex-col gap-6">
-	<div class="border-t border-border pt-4">
-		<p class="text-sm font-medium text-muted-foreground">All articles</p>
-	</div>
-	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-		{#each data.posts as post (post.slug)}
-			<ArticleCard {post} />
-		{/each}
-	</div>
-
-	<nav
-		class="flex items-center justify-between text-sm text-muted-foreground"
-		aria-label="Pagination"
-	>
-		{#if data.page > 1}
+	<div class="flex items-center justify-between border-t border-border pt-4">
+		{#if data.tag}
+			<p class="text-sm font-medium text-muted-foreground">
+				Articles tagged <span class="text-foreground">{data.tag}</span>
+			</p>
 			<a
-				href="/articles?page={data.page - 1}"
-				rel="prev"
-				class="font-medium text-primary transition-colors hover:text-foreground"
+				href="/articles"
+				class="text-sm text-muted-foreground transition-colors hover:text-foreground"
 			>
-				← Newer
+				Clear ×
 			</a>
 		{:else}
-			<span aria-hidden="true" class="opacity-40">← Newer</span>
+			<p class="text-sm font-medium text-muted-foreground">All articles</p>
 		{/if}
+	</div>
+	{#if data.posts.length === 0}
+		<p class="text-sm text-muted-foreground">No articles here yet.</p>
+	{:else}
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{#each data.posts as post (post.slug)}
+				<ArticleCard {post} />
+			{/each}
+		</div>
+	{/if}
 
-		<p>Page {data.page} of {data.pages}</p>
+	{#if data.posts.length > 0}
+		<nav
+			class="flex items-center justify-between text-sm text-muted-foreground"
+			aria-label="Pagination"
+		>
+			{#if data.page > 1}
+				<a
+					href="/articles?page={data.page - 1}{tagQs}"
+					rel="prev"
+					class="font-medium text-primary transition-colors hover:text-foreground"
+				>
+					← Newer
+				</a>
+			{:else}
+				<span aria-hidden="true" class="opacity-40">← Newer</span>
+			{/if}
 
-		{#if data.page < data.pages}
-			<a
-				href="/articles?page={data.page + 1}"
-				rel="next"
-				class="font-medium text-primary transition-colors hover:text-foreground"
-			>
-				Older →
-			</a>
-		{:else}
-			<span aria-hidden="true" class="opacity-40">Older →</span>
-		{/if}
-	</nav>
+			<p>Page {data.page} of {data.pages}</p>
+
+			{#if data.page < data.pages}
+				<a
+					href="/articles?page={data.page + 1}{tagQs}"
+					rel="next"
+					class="font-medium text-primary transition-colors hover:text-foreground"
+				>
+					Older →
+				</a>
+			{:else}
+				<span aria-hidden="true" class="opacity-40">Older →</span>
+			{/if}
+		</nav>
+	{/if}
 </section>

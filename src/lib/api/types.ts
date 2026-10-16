@@ -1,6 +1,9 @@
 export interface PostSummary {
 	slug: string;
 	title: string;
+	/** Secondary headline shown alongside the main title in listings. */
+	subtitle: string;
+	/** BE-owned display text (may be the article's opening); the FE only clamps it visually. */
 	preview: string;
 	date: string;
 	readTime: number;

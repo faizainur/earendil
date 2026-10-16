@@ -11,10 +11,10 @@
 </script>
 
 <!-- Hero: text left, mountain line-art visual on the right (hidden below md) -->
-<section class="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_auto]">
+<section class="mx-auto grid w-full max-w-3xl items-center gap-8 md:grid-cols-[minmax(0,1fr)_auto]">
 	<div class="flex flex-col gap-6">
-		<p class="text-sm font-medium tracking-wide text-primary">Hello, I&rsquo;m Felix.</p>
-		<h1 class="max-w-3xl text-4xl leading-tight font-semibold tracking-tight md:text-5xl">
+		<p class="text-sm font-medium tracking-wide text-primary">Hello, I&rsquo;m Faiz Ainur Rofiq.</p>
+		<h1 class="text-4xl leading-tight font-semibold tracking-tight md:text-5xl">
 			I write about systems that keep working under pressure.
 		</h1>
 		<p class="max-w-2xl text-lg leading-relaxed text-muted-foreground">
@@ -27,7 +27,7 @@
 		fill="none"
 		stroke="currentColor"
 		aria-hidden="true"
-		class="hidden w-64 text-muted-foreground/40 md:block lg:w-80"
+		class="hidden w-56 text-muted-foreground/40 md:block"
 	>
 		<circle cx="316" cy="58" r="26" stroke-width="2" />
 		<path
@@ -45,7 +45,7 @@
 </section>
 
 <!-- Selected writing -->
-<section id="writing" class="flex flex-col gap-6">
+<section id="writing" class="mx-auto flex w-full max-w-3xl flex-col gap-6">
 	<div class="border-t border-border pt-4">
 		<p class="text-sm font-medium text-muted-foreground">Selected writing</p>
 	</div>

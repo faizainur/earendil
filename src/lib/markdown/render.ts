@@ -5,6 +5,7 @@
  */
 import MarkdownIt, { type MarkdownIt as MarkdownItInstance, type Token } from 'markdown-it';
 import anchor from 'markdown-it-anchor';
+import container from 'markdown-it-container';
 import taskLists from 'markdown-it-task-lists';
 import markdownItShiki from '@shikijs/markdown-it';
 import type { BuiltinLanguage } from 'shiki';
@@ -35,6 +36,15 @@ const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
 // `permalink` defaults to false in markdown-it-anchor v10 — heading ids only, no anchor icons.
 md.use(anchor, { level: [2, 3] });
 md.use(taskLists);
+/**
+ * Authoring directive `::: grid ... :::` — a masonry image grid inside articles,
+ * styled to match /gallery. Unknown `:::name` blocks are left to render as plain
+ * text, so old content degrades gracefully.
+ */
+md.use(container, 'grid', {
+	render: (tokens, idx) =>
+		tokens[idx].nesting === 1 ? '<div class="article-grid columns-2 md:columns-3">\n' : '</div>\n'
+});
 
 /** Lazily build the Shiki-ready engine once per process (grammar loading is the slow part). */
 let engine: Promise<MarkdownItInstance> | null = null;

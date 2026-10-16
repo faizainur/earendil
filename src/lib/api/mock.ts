@@ -60,10 +60,136 @@ const photos: Photo[] = [
 
 const posts: PostDetail[] = [
 	{
+		slug: 'observability-is-a-contract',
+		title: 'Observability is a contract, not a dashboard',
+		subtitle: 'Schemas, sampling budgets, and the questions your pager will actually ask',
+		preview:
+			'A long-form field guide to logs, traces, and metrics as promises between teams: what every service owes its operators, how to structure a logging schema that survives contact with reality, why sampling is a product decision, and how to keep cardinality inside a budget instead of a warning. Includes worked examples in Go, YAML, and shell.',
+		date: '2024-06-02',
+		readTime: 16,
+		thumbnail: thumbnails[1],
+		tags: ['observability', 'logging', 'tracing', 'metrics'],
+		content: `Dashboards are what observability looks like after it has already failed. The interesting part happens earlier, as a contract: every service promising, in writing, that it can answer certain questions about itself when things go wrong at 3am.
+
+This is a long one. Grab coffee.
+
+## Why "observability" is a contract
+
+A system is observable when an operator can ask arbitrary questions of it without shipping new code. That definition sounds academic until you watch someone try to answer "which tenant drove the p99 spike between 02:10 and 02:20?" on a system that logs free-text strings.
+
+### The questions you must be able to ask cold
+
+Before a service touches production, its owner should be able to answer these without opening a laptop:
+
+- What is it doing right now, and where is it stuck?
+- Which upstream dependency is slowing it down?
+- Which tenant, feature flag, or queue is responsible for the pain?
+- What changed in the last deploy window?
+
+If any of those require archaeology, the contract is incomplete.
+
+### What the pager actually needs
+
+The page itself is the last mile of observability. A page that does not name a ~~vague symptom~~ specific failed contract is noise wearing a trench coat.
+
+## Structured logs with a schema you can defend
+
+Free-text logs are a compounding tax: every query pays it, forever. A schema is the down payment.
+
+### Fields worth standardizing
+
+Every log line in the system should carry a common spine:
+
+\`\`\`go
+type LogFields struct {
+	Timestamp  time.Time \x60json:"ts"\x60
+	Level      string    \x60json:"level"\x60
+	Service    string    \x60json:"svc"\x60
+	RequestID  string    \x60json:"rid"\x60
+	TenantID   string    \x60json:"tenant,omitempty"\x60
+	DurationMs float64   \x60json:"dur_ms,omitempty"\x60
+}
+\`\`\`
+
+The boring names matter more than the coverage. Two services disagreeing on \`rid\` versus \`request_id\` costs more over a year than any missing field.
+
+### The cost of free-text everything
+
+The tax shows up exactly when you cannot afford it: mid-incident, when every second of grep is a second of user pain.
+
+## Traces: promises between services
+
+A trace is a document signed by every service a request touched. It is only trustworthy if all the signers use the same pen.
+
+### Sampling is a product decision
+
+Head-based sampling at 1% feels economical until the one story you need is in the 99% you dropped. Tail-based sampling keeps the interesting stories:
+
+\`\`\`bash
+# keep anything slower than 1s, and 1% of everything else
+tail-sample --latency-p99 1s --keep-slow --baseline 0.01
+\`\`\`
+
+The teams that treat sampling as configuration eventually treat it as roadmap.
+
+![Trace waterfall of a slow checkout request](https://picsum.photos/seed/trace-waterfall/1200/700)
+
+A well-sampled trace turns "something is slow" into "the payments span held a connection for 900ms" — the difference between an afternoon of guessing and an afternoon of fixing.
+
+::: grid
+![Alpine ridgeline at dawn](https://picsum.photos/seed/alpine-dawn/800/520)
+
+![Rainy crosswalk under neon](https://picsum.photos/seed/rainy-crosswalk/520/760)
+
+![Fog rolling over a coastline](https://picsum.photos/seed/coast-fog/720/720)
+
+![Desert highway panorama](https://picsum.photos/seed/desert-panorama/1100/460)
+
+![Empty metro platform at night](https://picsum.photos/seed/metro-platform/540/800)
+
+![Lakeside at dusk](https://picsum.photos/seed/lakeside-dusk/820/560)
+
+![Narrow old-town alley](https://picsum.photos/seed/old-town-alley/560/880)
+
+![Stream cutting through forest](https://picsum.photos/seed/forest-stream/780/600)
+
+![Harbor terraces from above](https://picsum.photos/seed/harbor-terrace/640/860)
+:::
+
+## Metrics and the cardinality budget
+
+Every label on a metric is a multiplier on storage, query cost, and the chance you ship a panic.
+
+| Signal   | Good labels                        | Terrible labels        |
+| -------- | ---------------------------------- | ---------------------- |
+| Requests | route, status, tenant              | user_id, full URL path |
+| Latency  | route, dependency                  | pod name (churns)      |
+| Errors   | error class                          | raw error string     |
+
+## Making it all survive a bad Monday
+
+The contract only exists if it is checked:
+
+- [x] every service emits the log spine above
+- [x] dashboards link to saved queries, not screenshots
+- [ ] a quarterly "delete your dashboard" review
+- [ ] one game day per quarter with the tracing backend on fire
+
+> Observability is not a tool you buy. It is a promise your services make to whoever gets paged — usually future you.
+
+## Further reading
+
+- [A lesson in sending structured logs](https://example.com/structured-logs)
+- [The cardinality problem in practice](https://example.com/cardinality)
+- [Designing pages people answer](https://example.com/paging)
+`
+	},
+	{
 		slug: 'shape-of-a-useful-queue',
 		title: 'The shape of a useful queue',
+		subtitle: 'Backpressure, fairness, and the promises hidden between producers and consumers',
 		preview:
-			'A practical look at backpressure, fairness, and the costs hidden between producers and consumers.',
+			'A practical look at backpressure, fairness, and the costs hidden between producers and consumers. A queue is less a data structure than a set of promises about what happens when systems disagree about speed — and every new producer quietly renegotiates those promises before the first message is ever enqueued.',
 		date: '2024-05-14',
 		readTime: 8,
 		thumbnail: thumbnails[0],
@@ -116,7 +242,9 @@ curl -s localhost:8080/metrics | grep queue_depth
 	{
 		slug: 'when-latency-becomes-a-product-decision',
 		title: 'When latency becomes a product decision',
-		preview: 'How tail latency changes architecture, budgets, and what users actually feel.',
+		subtitle: 'Why the p99 is where user trust is actually won or lost',
+		preview:
+			'How tail latency changes architecture, budgets, and what users actually feel. Median response times are a vanity metric; the p99 is where trust is won or lost, and it hides in plain sight until a busy Friday makes it impossible to ignore.',
 		date: '2024-04-02',
 		readTime: 11,
 		thumbnail: thumbnails[1],
@@ -149,7 +277,9 @@ spec:
 	{
 		slug: 'designing-for-the-failure-you-can-see',
 		title: 'Designing for the failure you can see',
-		preview: 'Operational habits for distributed systems that fail in familiar ways.',
+		subtitle: 'Operational habits for systems that fail in familiar ways',
+		preview:
+			'Operational habits for distributed systems that fail in familiar ways. Most outages are not exotic — they are the same three failures rehearsed under different lighting, and teams that survive them treat predictability as a feature you build, not luck you wait for.',
 		date: '2024-02-18',
 		readTime: 7,
 		thumbnail: null,
@@ -176,7 +306,9 @@ Chaos drills earn their keep not by finding new bugs but by checking that the ol
 	{
 		slug: 'a-small-field-guide-to-idempotency',
 		title: 'A small field guide to idempotency',
-		preview: 'Retries are easy. Making them safe is the real interface.',
+		subtitle: 'Retries are easy; making them safe is the real interface',
+		preview:
+			'Retries are easy. Making them safe is the real interface. An at-least-once world without idempotency keys is just a distributed double-charge machine, patiently waiting for the network to have a bad afternoon.',
 		date: '2024-01-09',
 		readTime: 6,
 		thumbnail: null,
@@ -210,6 +342,7 @@ function summarize(post: PostDetail): PostSummary {
 	return {
 		slug: post.slug,
 		title: post.title,
+		subtitle: post.subtitle,
 		preview: post.preview,
 		date: post.date,
 		readTime: post.readTime,
@@ -218,8 +351,9 @@ function summarize(post: PostDetail): PostSummary {
 }
 
 export const mockApi: BlogApi = {
-	async getPosts({ offset = 0, limit = posts.length } = {}) {
-		return { total: posts.length, items: posts.slice(offset, offset + limit).map(summarize) };
+	async getPosts({ offset = 0, limit = posts.length, tag } = {}) {
+		const source = tag ? posts.filter((p) => p.tags.includes(tag)) : posts;
+		return { total: source.length, items: source.slice(offset, offset + limit).map(summarize) };
 	},
 
 	async getPost(slug) {

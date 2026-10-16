@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
 @import '@fontsource/jetbrains-mono';
+@import '@fontsource-variable/fraunces';
 @plugin '@tailwindcss/typography';
 
 /* Semantic color tokens, mirroring the Flowstep mockups (shadcn-style zinc palette). */
@@ -13,6 +14,8 @@
 	--muted-foreground: #71717a;
 	--accent: #f4f4f5;
 	--border: #e4e4e7;
+	/* Brand accent — the semicolon in the wordmark, nothing else. */
+	--brand: #7c3aed;
 }
 
 [data-theme='dark'] {
@@ -24,6 +27,7 @@
 	--muted-foreground: #a1a1aa;
 	--accent: #27272a;
 	--border: #27272a;
+	--brand: #a78bfa;
 }
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -32,6 +36,8 @@
 	--container-page: 1120px;
 	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+	/* Display serif for the wordmark only — never for body/UI text. */
+	--font-brand: 'Fraunces Variable', ui-serif, Georgia, 'Times New Roman', serif;
 
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -41,6 +47,7 @@
 	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
 	--color-border: var(--border);
+	--color-brand: var(--brand);
 }
 
 @layer base {
@@ -51,23 +58,55 @@
 	}
 }
 
-/* Slim themed horizontal scrollbar for the homepage photo strip (utilities can't reach ::-webkit-*). */
-.scroll-slim {
+/* Slim themed horizontal scrollbars — homepage photo strip + article code blocks (pseudo-elements aren't reachable via utilities). */
+.scroll-slim,
+.prose pre {
 	scrollbar-width: thin;
 	scrollbar-color: var(--border) transparent;
 }
-.scroll-slim::-webkit-scrollbar {
+.scroll-slim::-webkit-scrollbar,
+.prose pre::-webkit-scrollbar {
 	height: 6px;
 }
-.scroll-slim::-webkit-scrollbar-track {
+.scroll-slim::-webkit-scrollbar-track,
+.prose pre::-webkit-scrollbar-track {
 	background: transparent;
 }
-.scroll-slim::-webkit-scrollbar-thumb {
+.scroll-slim::-webkit-scrollbar-thumb,
+.prose pre::-webkit-scrollbar-thumb {
 	background: var(--border);
 	border-radius: 9999px;
 }
-.scroll-slim::-webkit-scrollbar-thumb:hover {
+.scroll-slim::-webkit-scrollbar-thumb:hover,
+.prose pre::-webkit-scrollbar-thumb:hover {
 	background: var(--muted-foreground);
+}
+
+/* Theme switch: circular reveal of the new snapshot, growing from the navbar's
+   toggle corner. Skipped automatically for prefers-reduced-motion (view
+   transitions fall back to instant swap). */
+::view-transition-image-pair(root) {
+	isolation: isolate;
+}
+::view-transition-old(root) {
+	animation: none;
+}
+::view-transition-new(root) {
+	animation: theme-reveal 0.45s ease-in-out;
+}
+@keyframes theme-reveal {
+	from {
+		clip-path: circle(0 at min(calc(100% - 5rem), calc(50% + 32rem)) 2.4rem);
+	}
+	to {
+		clip-path: circle(160vmax at min(calc(100% - 5rem), calc(50% + 32rem)) 2.4rem);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-new(root) {
+		animation: none;
+	}
 }
 
 /* Dialog/lightbox entrance — shared pattern with the future search palette (DESIGN.md §5). */
@@ -96,6 +135,115 @@
 [data-theme='dark'] .shiki span {
 	color: var(--shiki-dark) !important;
 	background: var(--shiki-dark-bg) !important;
+}
+
+/**
+ * `.prose` overrides — raw-CSS exception #1 (DESIGN.md §7).
+ * Map the typography-plugin's `--tw-prose-*` color vars onto semantic tokens so
+ * Markdown content flips with `data-theme`, and neutralize its `pre`/inline-code
+ * defaults where Shiki's own vars and padding should own the block.
+ */
+.prose {
+	--tw-prose-body: var(--foreground);
+	--tw-prose-headings: var(--foreground);
+	--tw-prose-lead: var(--muted-foreground);
+	--tw-prose-links: var(--primary);
+	--tw-prose-bold: var(--foreground);
+	--tw-prose-counters: var(--muted-foreground);
+	--tw-prose-bullets: var(--border);
+	--tw-prose-hr: var(--border);
+	--tw-prose-quotes: var(--foreground);
+	--tw-prose-quote-borders: var(--border);
+	--tw-prose-captions: var(--muted-foreground);
+	--tw-prose-code: var(--foreground);
+	--tw-prose-pre-code: var(--foreground);
+	--tw-prose-pre-bg: transparent;
+}
+.prose code::before,
+.prose code::after {
+	content: none;
+}
+/* Inline article images match the site's framed-media language. */
+.prose img {
+	border: 1px solid var(--border);
+	border-radius: 8px;
+}
+/* ::: grid — Pinterest-style masonry: natural aspect ratios, staggered rows.
+   Images are forced to block layout so columns can break *between* tiles even
+   when the author wrote them as one soft-wrapped paragraph (the common case);
+   uniform 16px gutters both axes; a tile itself never splits. */
+.prose .article-grid {
+	margin: 1.5rem 0;
+	column-gap: 1rem;
+}
+.prose .article-grid p {
+	margin: 0;
+}
+.prose .article-grid img {
+	display: block;
+	width: 100%;
+	margin: 0 0 1rem;
+	break-inside: avoid;
+}
+/* Tables: rounded soft header band, hairline row separators, row hover.
+   (typography draws table borders via box-shadow — reset it first) */
+.prose table {
+	width: 100%;
+	font-size: 0.875rem;
+	line-height: 1.6;
+	border-collapse: collapse;
+}
+.prose thead th {
+	padding: 0.5rem 0.75rem;
+	background: var(--muted);
+	border: none;
+	border-bottom: 1px solid var(--border);
+	box-shadow: none;
+	color: var(--foreground);
+	font-weight: 500;
+	text-align: left;
+}
+.prose thead th:first-child {
+	border-top-left-radius: 8px;
+}
+.prose thead th:last-child {
+	border-top-right-radius: 8px;
+}
+.prose tbody td {
+	padding: 0.5rem 0.75rem;
+	border: none;
+	border-bottom: 1px solid var(--border);
+	box-shadow: none;
+	color: var(--foreground);
+}
+.prose tbody tr:last-child td {
+	border-bottom: none;
+}
+.prose tbody tr {
+	transition: background-color 120ms ease;
+}
+.prose tbody tr:hover td {
+	background: color-mix(in srgb, var(--muted) 45%, transparent);
+}
+.prose pre.shiki {
+	padding: 1rem;
+	border-radius: 8px;
+}
+/* Line-wrap toggle (codeBlockTools action): pre-wrap replaces horizontal scrolling. */
+.prose pre.code-wrap {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+/* Touch devices have no hover — keep the code toolbar + heading anchors always revealed there. */
+/* Touch devices have no hover — keep the code toolbar revealed; heading anchors
+   live in the left margin (negative offset) and would overflow small screens. */
+@media (hover: none) {
+	.prose .code-tools {
+		opacity: 1;
+	}
+	.prose .heading-anchor {
+		display: none;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
