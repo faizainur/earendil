@@ -1,3 +1,14 @@
+<script lang="ts">
+	import PostCard from '#lib/components/PostCard.svelte';
+	import type { PageData } from './$types';
+
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+</script>
+
 <section class="flex flex-col gap-6">
 	<p class="text-sm font-medium tracking-wide text-primary">Hello, I&rsquo;m Felix.</p>
 	<h1 class="max-w-3xl text-4xl leading-tight font-semibold tracking-tight md:text-5xl">
@@ -7,5 +18,13 @@
 		Backend engineer exploring distributed systems, high-throughput applications, and the quiet
 		details behind reliable software.
 	</p>
-	<p class="text-sm text-muted-foreground">Selected writing arrives in Milestone 3.</p>
+
+	<div class="border-t border-border pt-4">
+		<p class="text-sm font-medium text-muted-foreground">Selected writing</p>
+	</div>
+	<div>
+		{#each data.posts as post (post.slug)}
+			<PostCard {post} />
+		{/each}
+	</div>
 </section>
