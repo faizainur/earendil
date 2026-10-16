@@ -47,8 +47,7 @@
 </section>
 
 {#if selected}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- role="presentation" keeps the a11y rules quiet on this click-away backdrop -->
 	<div
 		class="fixed inset-0 z-30 flex items-center justify-center bg-background/70 p-4 backdrop-blur-sm"
 		role="presentation"
@@ -66,7 +65,7 @@
 				{selected.alt}
 			</figcaption>
 		</figure>
-		<!-- svelte-ignore a11y_autofocus -- dialog should capture focus when opened -->
+		<!-- svelte-ignore a11y_autofocus -->
 		<button
 			type="button"
 			autofocus
