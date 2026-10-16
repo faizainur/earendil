@@ -29,10 +29,9 @@
 	<aside class="col-span-12 grid grid-cols-12 gap-6 lg:col-span-9">
 		<div class="hidden pt-2 lg:col-span-2 lg:block">
 			<div class="sticky top-6 text-xs text-muted-foreground">
-				<div class="mb-6">
-					<p class="text-m mb-2">{date}</p>
-					<p class="text-s">{data.post.readTime} min read</p>
-				</div>
+				<p class="mb-6 font-mono text-xs text-muted-foreground">
+					{date} · {data.post.readTime} min read<span class="text-brand">;</span>
+				</p>
 				{#if data.post.tags.length > 0}
 					<div class="flex flex-wrap gap-1.5 border-t border-border pt-4">
 						{#each data.post.tags as tag (tag)}
@@ -44,7 +43,9 @@
 		</div>
 
 		<div class="col-span-12 min-w-0 lg:col-span-10">
-			<h1 class="mb-4 text-4xl font-semibold tracking-tight text-foreground">{data.post.title}</h1>
+			<h1 class="mb-4 font-brand text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
+				{data.post.title}
+			</h1>
 			<p class="mb-4 max-w-2xl text-xl leading-relaxed text-muted-foreground">
 				{data.post.preview}
 			</p>
@@ -66,11 +67,11 @@
 				/>
 			{/if}
 			<div
-				class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-muted-foreground lg:hidden"
+				class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 font-mono text-xs text-muted-foreground lg:hidden"
 			>
 				<span>{date}</span>
 				<span aria-hidden="true">·</span>
-				<span>{data.post.readTime} min read</span>
+				<span>{data.post.readTime} min read<span class="text-brand">;</span></span>
 				{#each data.post.tags as tag (tag)}
 					<a href="/articles?tag={encodeURIComponent(tag)}" class={chip}>{tag}</a>
 				{/each}

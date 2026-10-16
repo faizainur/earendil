@@ -238,6 +238,10 @@
 	border: 1px solid var(--border);
 	border-radius: 8px;
 }
+/* Serif section headings over sans body — the editorial pairing of the brand. */
+.prose :is(h2, h3) {
+	font-family: var(--font-brand);
+}
 /* ::: grid — Pinterest-style masonry: natural aspect ratios, staggered rows.
    Images are forced to block layout so columns can break *between* tiles even
    when the author wrote them as one soft-wrapped paragraph (the common case);

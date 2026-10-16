@@ -18,7 +18,9 @@
 			? 'border-y border-border py-5 text-sm'
 			: 'border-l border-border pl-6 text-sm'}
 	>
-		<h2 class="mb-3 font-semibold">On this page</h2>
+		<h2 class="mb-3 font-brand text-sm font-semibold text-muted-foreground">
+			Contents<span class="text-brand">;</span>
+		</h2>
 		<ul class={variant === 'inline' ? 'grid gap-2' : 'grid gap-3'}>
 			{#each toc as entry (entry.id)}
 				<li class={entry.depth === 3 ? 'pl-3' : undefined}>
