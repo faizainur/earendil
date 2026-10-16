@@ -139,15 +139,15 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 ## 8. Responsive matrix
 
-| Area           | Mobile `< md`/`< lg`                                                                              | Desktop                                                       |
-| -------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Container      | `px-4/6` gutters                                                                                  | 1120px centered, generous margins                             |
-| Navbar search  | icon-only rounded-square button                                                                   | pill + label + `Mod+K` kbd                                    |
-| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden                                     | meta rail / main / sticky TOC grid                            |
-| Search dialog  | `inset-x-3` sheet                                                                                 | centered `max-w-xl` card                                      |
-| Home list      | flex row: title + subtitle + preview clamped to 3 lines (`…`), meta inline, small right thumbnail | same, within a centered `max-w-3xl` column (hero & strip too) |
-| Photography    | home: horizontal strip; `/gallery`: 2-col masonry                                                 | home: horizontal strip; `/gallery`: 3-col masonry             |
-| Footer         | wraps/stacks                                                                                      | single constrained row                                        |
+| Area           | Mobile `< md`/`< lg`                                                                                                                                                                         | Desktop                                           |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Container      | `px-4/6` gutters                                                                                                                                                                             | 1120px centered, generous margins                 |
+| Navbar search  | icon-only rounded-square button                                                                                                                                                              | pill + label + `Mod+K` kbd                        |
+| Article layout | single column: title→meta→inline TOC→body; sticky rail hidden                                                                                                                                | meta rail / main / sticky TOC grid                |
+| Search dialog  | `inset-x-3` sheet                                                                                                                                                                            | centered `max-w-xl` card                          |
+| Home list      | flex row: violet mono index `01;` + mono date/read-time masthead **above** a Fraunces serif title (violet underline grows on hover), subtitle, 3-line clamped preview; small right thumbnail | same, wider gaps; row hover fills `accent/40`     |
+| Photography    | home: horizontal strip; `/gallery`: 2-col masonry                                                                                                                                            | home: horizontal strip; `/gallery`: 3-col masonry |
+| Footer         | wraps/stacks                                                                                                                                                                                 | single constrained row                            |
 
 Rules: consistent `md`/`lg` breakpoints; differences handled with visibility variants (`hidden md:flex` pill ↔ `md:hidden` icon button, `hidden lg:grid` rails), **never** duplicate mobile/desktop components except where markup genuinely differs. Touch targets ≥44px. QA against all 8 screens (light/dark automatic via tokens; desktop/mobile via variants).
 

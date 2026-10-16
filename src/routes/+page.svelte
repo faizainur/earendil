@@ -79,8 +79,8 @@
 >
 	<SectionLabel title="Selected writing" />
 	<div>
-		{#each data.posts as post (post.slug)}
-			<PostCard {post} />
+		{#each data.posts as post, i (post.slug)}
+			<PostCard {post} index={i + 1} />
 		{/each}
 	</div>
 </section>
