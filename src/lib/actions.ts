@@ -173,6 +173,173 @@ export function focusOnMount(node: HTMLElement) {
 	node.focus();
 }
 
+/**
+ * Pinch-to-zoom + drag-to-pan for a standalone image (the lightbox `<img>`).
+ * Pointer events cover every modality: two-finger pinch scales around the
+ * pinch midpoint (and drags while pinching), one-finger drag pans while
+ * zoomed, trackpad/mouse ctrl+wheel zooms around the cursor, double-click
+ * resets. Motion lives on the img's own transform, so the figure's enter/exit
+ * transitions and the backdrop's tap-away (direct-target-only) are untouched.
+ */
+export function pinchZoom(node: HTMLElement) {
+	node.style.touchAction = 'none'; // the element owns the gesture; browser page-zoom would fight it
+	node.style.userSelect = 'none';
+	node.setAttribute('draggable', 'false');
+
+	const MIN = 1;
+	const MAX = 5;
+
+	let scale = 1;
+	let tx = 0;
+	let ty = 0;
+	// Layout box of the element, captured while untransformed (scale === 1).
+	let base = { cx: 0, cy: 0, w: 0, h: 0 };
+	const pointers = new Map<number, { x: number; y: number }>();
+	// Pinch anchors the image-local point under the start midpoint: ux/uy stay
+	// glued to the (moving) midpoint as the scale changes.
+	let pinch: { d0: number; s0: number; ux: number; uy: number } | null = null;
+	let panFrom: { x: number; y: number; tx: number; ty: number } | null = null;
+
+	const mid = () => {
+		const [a, b] = [...pointers.values()];
+		return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+	};
+	const spread = () => {
+		const [a, b] = [...pointers.values()];
+		return Math.hypot(b.x - a.x, b.y - a.y);
+	};
+
+	function apply(animate = false) {
+		node.style.transition = animate ? 'transform 180ms ease-out' : 'none';
+		node.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+		if (animate) {
+			const done = () => (node.style.transition = 'none');
+			node.addEventListener('transitionend', done, { once: true });
+			setTimeout(done, 220); // belt: transitionend can be missed if nothing visually changed
+		}
+	}
+
+	/** Never let the image drift fully off-screen; center an axis when the
+	 *  scaled size is smaller than the viewport. */
+	function clampT() {
+		const lx = Math.max(0, (base.w * scale - window.innerWidth) / 2);
+		const ly = Math.max(0, (base.h * scale - window.innerHeight) / 2);
+		tx = Math.min(lx, Math.max(-lx, tx));
+		ty = Math.min(ly, Math.max(-ly, ty));
+	}
+
+	const refreshBase = () => {
+		if (scale !== 1) return; // rect is layout truth only while untransformed
+		const r = node.getBoundingClientRect();
+		base = { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width, h: r.height };
+	};
+
+	/** Scale toward/away from a fixed screen point (pinch midpoint or cursor). */
+	const scaleAround = (px: number, py: number, target: number) => {
+		const ux = (px - base.cx - tx) / scale;
+		const uy = (py - base.cy - ty) / scale;
+		scale = Math.min(MAX, Math.max(MIN, target));
+		tx = px - base.cx - scale * ux;
+		ty = py - base.cy - scale * uy;
+	};
+
+	const onDown = (e: PointerEvent) => {
+		e.preventDefault(); // no native drag/selection competing with the gesture (click still reaches the backdrop, which ignores non-direct targets anyway)
+		node.setPointerCapture(e.pointerId);
+		pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+		refreshBase();
+		if (pointers.size === 2) {
+			pinch = { d0: spread(), s0: scale, ux: 0, uy: 0 };
+			const m = mid();
+			pinch.ux = (m.x - base.cx - tx) / scale;
+			pinch.uy = (m.y - base.cy - ty) / scale;
+			panFrom = null;
+		} else if (pointers.size === 1 && scale > 1) {
+			panFrom = { x: e.clientX, y: e.clientY, tx, ty };
+		}
+	};
+
+	const onMove = (e: PointerEvent) => {
+		if (!pointers.has(e.pointerId)) return;
+		pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+		if (pinch && pointers.size >= 2) {
+			// Allow overshoot below 1 for the spring-back feel; upper clamp is hard.
+			const raw = pinch.s0 * (spread() / pinch.d0);
+			const s2 = Math.min(MAX, Math.max(MIN * 0.5, raw));
+			// Rubber-band under 1 instead of freezing the fingers.
+			scale = s2 < MIN ? MIN + (s2 - MIN) * 0.35 : s2;
+			const m = mid();
+			tx = m.x - base.cx - scale * pinch.ux;
+			ty = m.y - base.cy - scale * pinch.uy;
+			apply();
+		} else if (panFrom && pointers.size === 1) {
+			tx = panFrom.tx + (e.clientX - panFrom.x);
+			ty = panFrom.ty + (e.clientY - panFrom.y);
+			apply();
+		}
+	};
+
+	const onUp = (e: PointerEvent) => {
+		pointers.delete(e.pointerId);
+		if (pointers.size < 2) pinch = null;
+		if (pointers.size === 1) {
+			const [p] = pointers.values();
+			panFrom = scale > MIN ? { x: p.x, y: p.y, tx, ty } : null;
+		} else if (pointers.size === 0) {
+			panFrom = null;
+			scale = Math.max(MIN, scale); // spring over-pinch back to fit
+			if (scale === 1) {
+				tx = 0;
+				ty = 0;
+			} else {
+				clampT();
+			}
+			apply(true);
+		}
+	};
+
+	const onDbl = () => {
+		if (scale > 1) {
+			scale = 1;
+			tx = ty = 0;
+			apply(true);
+		}
+	};
+
+	const onWheel = (e: WheelEvent) => {
+		if (!e.ctrlKey) return; // trackpad pinch sends ctrl+wheel; plain scroll stays un hijacked
+		e.preventDefault();
+		refreshBase();
+		scaleAround(e.clientX, e.clientY, scale * Math.exp(-e.deltaY * 0.01));
+		if (scale === 1) {
+			tx = 0;
+			ty = 0;
+		}
+		clampT();
+		apply();
+	};
+
+	node.addEventListener('pointerdown', onDown);
+	node.addEventListener('pointermove', onMove);
+	node.addEventListener('pointerup', onUp);
+	node.addEventListener('pointercancel', onUp);
+	node.addEventListener('lostpointercapture', onUp);
+	node.addEventListener('dblclick', onDbl);
+	node.addEventListener('wheel', onWheel, { passive: false });
+
+	return {
+		destroy() {
+			node.removeEventListener('pointerdown', onDown);
+			node.removeEventListener('pointermove', onMove);
+			node.removeEventListener('pointerup', onUp);
+			node.removeEventListener('pointercancel', onUp);
+			node.removeEventListener('lostpointercapture', onUp);
+			node.removeEventListener('dblclick', onDbl);
+			node.removeEventListener('wheel', onWheel);
+		}
+	};
+}
+
 /** mermaid themeVariable → CSS token. layout.css is the ONLY source of color —
  * change diagram colors there, never here.
  *

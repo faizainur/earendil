@@ -2,7 +2,7 @@
 	import { X } from 'lucide-svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, scale } from 'svelte/transition';
-	import { focusOnMount } from '#lib/actions.ts';
+	import { pinchZoom, focusOnMount } from '#lib/actions.ts';
 
 	export interface LightboxImage {
 		src: string;
@@ -46,6 +46,7 @@
 		<img
 			src={image.src}
 			alt={image.alt}
+			use:pinchZoom
 			class="max-h-[80vh] max-w-[min(92vw,64rem)] rounded-xl border border-border object-contain shadow-xl"
 		/>
 		<figcaption class="pt-3 text-center text-sm text-muted-foreground">{image.alt}</figcaption>
