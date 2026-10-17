@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { ApiError, api } from '#lib/api/index.ts';
+import { ApiError, api } from '#lib/api/server.ts';
 import { renderMarkdown } from '#lib/markdown/render.ts';
 import type { PageServerLoad } from './$types';
 

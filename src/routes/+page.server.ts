@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { api } from '#lib/api/index.ts';
+import { api } from '#lib/api/server.ts';
 import type { PageServerLoad } from './$types';
 
 const PAGE_SIZE = 10;

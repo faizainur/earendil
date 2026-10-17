@@ -1,4 +1,4 @@
-import { api } from '#lib/api/index.ts';
+import { api } from '#lib/api/server.ts';
 import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
