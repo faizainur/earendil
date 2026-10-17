@@ -155,6 +155,14 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 **Compare against** `feature/a-inline-diagrams` (SSR inline, zero JS, needs the BE pipeline) — same `--diagram-*` token contract, so both render identically themed; decision after side-by-side eyeball: TTFB & layout shift (A) vs chunk fetch & post-hydration pop-in (B).
 
+**Refined (2026-10-18):**
+
+1. **Shimmer skeleton**: the action now swaps placeholders for `.diagram-loading` synchronously on the hydration tick (gradient-sweep keyframes, `role="status"`, reduced-motion safe) — JS visitors never see raw source; the code remains only the no-JS state and per-diagram failure fallback.
+2. **Click-to-zoom**: rendered diagrams get `cursor-zoom-in` + a click handler feeding the existing `ImageLightbox` a `data:image/svg+xml` snapshot of the current SVG (works because mermaid bakes hex colors — unlike var()-based A-inline SVGs). Snapshot built on click ⇒ always shows the live theme.
+3. **Theming maintenance contract**: colors live ONLY as `--diagram-*` tokens in layout.css; JS mapping is the `MERMAID_VARS`/`RAMP` tables in actions.ts (zero hardcoded colors, no scattered fallbacks; missing token ⇒ dev console warning). `darkMode` derived from `data-theme` (fixes derived-tone direction in dark), `look: 'classic'` pinned (v12's per-type defaults are split-brain: 10 types `neo`, the rest `classic`). `themeCSSVariables` checked — NOT in the installed 12.2.0 build, so re-render stays the sync mechanism.
+4. **Guardrail tests**: `theming.contract.test.ts` couples the two files — every `--diagram-*` value hex-only, light/dark token parity, every mapped token exists in CSS (+1 pipeline test → 28 total).
+5. **Test garden**: queue → flowchart (redux-default family), latency → sequenceDiagram (same family), observability → pie (classic-default family) — both v12 default paths exercised with topically honest content. The placeholder rule is diagram-type-agnostic (keys on the `mermaid` info string; mermaid dispatches on the source's first line), proven by a test with mindmap/xychart fences, and the `cScale` categorical family was mapped for quadrantChart/radar/xyChart — all other v12 types inherit the base-palette derivation. (+2 tests → 29 total.)
+
 ---
 
 ## Milestone 7 — Responsive + a11y polish

@@ -95,7 +95,7 @@
 				use:tocSpy
 				use:headingAnchors
 				use:zoomableImages={(image) => (zoomed = image)}
-				use:mermaidDiagrams
+				use:mermaidDiagrams={(image) => (zoomed = image)}
 			>
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -- HTML is DOMPurify-sanitized in the server Markdown pipeline -->
 				{@html data.html}

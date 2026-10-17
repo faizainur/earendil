@@ -126,4 +126,18 @@ describe('renderMarkdown — mermaid fences (Route B)', () => {
 		// Escaped source survives as the honest no-JS/failure fallback.
 		expect(html).toContain('A --&gt; B');
 	});
+
+	it('placeholder is diagram-type-agnostic — exotic types flow through the same rule', async () => {
+		// The fence rule keys on the `mermaid` info string only; mermaid.render()
+		// dispatches by the source's first line. Official types need no FE change —
+		// the placeholder is plumbing, the parsing is mermaid's.
+		for (const src of [
+			'mindmap\n  root((blog))\n  drafts\n  published',
+			'xychart-beta\n  bar [1, 2, 3]'
+		]) {
+			const { html } = await renderMarkdown('```mermaid\n' + src + '\n```\n');
+			expect(html, src.split('\n')[0]).toContain('<pre class="mermaid-src">');
+			expect(html).not.toContain('shiki');
+		}
+	});
 });

@@ -148,77 +148,163 @@ export function focusOnMount(node: HTMLElement) {
 	node.focus();
 }
 
+/** mermaid themeVariable → CSS token. layout.css is the ONLY source of color —
+ * change diagram colors there, never here. Mermaid derives every other
+ * per-diagram var (clusterBkg, noteBkgColor, pie5+…) from these base entries,
+ * so do NOT enumerate extras. Hard constraint: mermaid reads hex only
+ * (#rgb/#rrggbb) — enforced by theming.contract.test.ts, not by review. */
+const MERMAID_VARS = {
+	background: '--diagram-bg',
+	mainBkg: '--diagram-bg',
+	primaryColor: '--diagram-surface',
+	primaryTextColor: '--diagram-ink',
+	primaryBorderColor: '--diagram-line',
+	secondaryColor: '--diagram-accent',
+	tertiaryColor: '--diagram-surface',
+	lineColor: '--diagram-muted',
+	textColor: '--diagram-ink'
+} as const;
+
+/** Categorical ramp (series that must be visually distinct) — layout.css owns the hues.
+ *  `base` is each family's starting index: mermaid's pie vars are 1-based, the rest 0-based.
+ *  Families: pie (pie charts), git (gitGraph branches), fillType (user-journey steps),
+ *  series (xyChart bars/lines), cScale (quadrantChart + radar point colors).
+ *  Everything else (clusterBkg, noteBkgColor, gantt sections, actor fills…) is
+ *  left to mermaid's own derivation from the base palette — do not enumerate more. */
+const RAMP = ['--diagram-cat-1', '--diagram-cat-2', '--diagram-cat-3', '--diagram-cat-4'] as const;
+const RAMP_FAMILIES: Array<[string, number]> = [
+	['pie', 1],
+	['git', 0],
+	['fillType', 0],
+	['series', 0],
+	['cScale', 0]
+];
+
 /**
  * Route B diagram rendering: hydrates `pre.mermaid-src` placeholders (emitted by
- * the markdown pipeline) with mermaid. The library is dynamically imported so
- * its chunk loads ONLY on pages that contain a diagram; the escaped source in
- * the placeholder doubles as the honest no-JS / pre-hydration / failure state
- * (shimmer via animate-pulse while the chunk loads). Re-renders when
- * `data-theme` flips so diagrams follow the palette.
+ * the markdown pipeline) with mermaid. The library is dynamically imported so its
+ * chunk loads ONLY on pages that contain a diagram. JS visitors never see the raw
+ * source: placeholders are swapped for a shimmer skeleton on the hydration tick,
+ * while the escaped source remains the no-JS state and the per-diagram failure
+ * fallback. Rendered diagrams are click-to-zoom through the page's ImageLightbox
+ * (data-URL snapshot of the current SVG — mermaid bakes concrete hex colors into
+ * its output, so an `<img>` renders it identically). Re-renders when `data-theme`
+ * flips so diagrams follow the palette.
  */
-export function mermaidDiagrams(node: HTMLElement) {
-	const items = [...node.querySelectorAll<HTMLElement>('pre.mermaid-src')].map((el) => ({
-		src: el.textContent ?? '',
-		el
+export function mermaidDiagrams(
+	node: HTMLElement,
+	onZoom?: (image: { src: string; alt: string }) => void
+) {
+	const items = [...node.querySelectorAll<HTMLElement>('pre.mermaid-src')].map((pre) => ({
+		src: pre.textContent ?? '',
+		pre,
+		host: pre, // placeholder → skeleton → rendered span
+		rendered: false,
+		svg: '' // current markup, snapshotted on zoom click
 	}));
 	if (items.length === 0) return;
+
+	// Synchronous swap: the shimmer skeleton covers the lazy-chunk gap.
+	for (const it of items) {
+		const sk = document.createElement('span');
+		sk.className = 'diagram-loading';
+		sk.setAttribute('role', 'status');
+		sk.setAttribute('aria-busy', 'true');
+		sk.textContent = 'Loading diagram'; // announced by AT, painted over by CSS
+		it.pre.replaceWith(sk);
+		it.host = sk;
+	}
+
+	const restoreCode = (it: (typeof items)[number]) => {
+		if (it.host !== it.pre) {
+			it.host.replaceWith(it.pre);
+			it.host = it.pre;
+		}
+		it.pre.classList.add('mermaid-failed'); // dashed border = "this was a diagram"
+	};
 
 	let disposed = false;
 	let seq = 0;
 	let ids = 0;
 
-	async function renderAll(initial: boolean) {
+	/** The palette contract: read tokens, hardcode nothing. */
+	function themeVariables(): Record<string, string | boolean> {
+		const cs = getComputedStyle(document.documentElement);
+		const vars: Record<string, string | boolean> = {
+			// Mode flag, not a color: flips mermaid's derived-tone direction.
+			darkMode: document.documentElement.dataset.theme === 'dark'
+		};
+		const font = cs.getPropertyValue('--font-sans').trim();
+		if (font) vars.fontFamily = font;
+		const read = (target: string, token: string) => {
+			const value = cs.getPropertyValue(token).trim();
+			if (!value) {
+				// No fallback by design: a missing token is a bug in layout.css, not a style choice.
+				if (import.meta.env.DEV)
+					console.warn(`mermaid: ${token} is undefined (themeVariables.${target})`);
+				return;
+			}
+			vars[target] = value;
+		};
+		for (const [target, token] of Object.entries(MERMAID_VARS)) read(target, token);
+		for (const [family, base] of RAMP_FAMILIES)
+			RAMP.forEach((token, i) => read(`${family}${i + base}`, token));
+		return vars;
+	}
+
+	async function renderAll() {
 		const my = ++seq;
 		let mermaid: typeof import('mermaid').default;
 		try {
 			mermaid = (await import('mermaid')).default;
 		} catch {
-			return; // offline/failed chunk — code fallbacks stay visible
+			// No loader is coming — the code is the truth again.
+			if (!disposed) for (const it of items) restoreCode(it);
+			return;
 		}
 		if (disposed || my !== seq) return;
-		if (initial) for (const it of items) it.el.classList.add('animate-pulse');
-
-		const cs = getComputedStyle(document.documentElement);
-		const v = (name: string, fb: string) => cs.getPropertyValue(name).trim() || fb;
 		mermaid.initialize({
 			startOnLoad: false,
 			securityLevel: 'strict',
-			theme: 'base',
-			themeVariables: {
-				background: v('--diagram-bg', '#ffffff'),
-				primaryColor: v('--diagram-surface', '#f4f4f5'),
-				primaryTextColor: v('--diagram-ink', '#09090b'),
-				primaryBorderColor: v('--diagram-line', '#e4e4e7'),
-				lineColor: v('--diagram-muted', '#71717a'),
-				secondaryColor: v('--diagram-accent', '#7c3aed'),
-				fontFamily: v('--font-sans', 'ui-sans-serif, system-ui, sans-serif')
-			}
+			theme: 'base', // the only customizable theme
+			look: 'classic', // pins over v12's mixed per-type defaults (neo for 10 types, classic for the rest)
+			themeVariables: themeVariables()
 		});
-
 		for (const it of items) {
 			try {
 				const { svg } = await mermaid.render(`fzr-mmd-${++ids}`, it.src);
 				if (disposed || my !== seq) return;
-				if (initial) {
+				it.svg = svg;
+				if (!it.rendered) {
 					const span = document.createElement('span');
 					span.className = 'diagram';
 					span.innerHTML = svg;
-					it.el.replaceWith(span);
-					it.el = span;
+					if (onZoom) {
+						span.classList.add('cursor-zoom-in');
+						span.addEventListener('click', () =>
+							onZoom({
+								src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(it.svg)}`,
+								alt: 'Diagram'
+							})
+						);
+					}
+					it.host.replaceWith(span);
+					it.host = span;
+					it.rendered = true;
 				} else {
-					it.el.innerHTML = svg;
+					it.host.innerHTML = svg; // theme re-render paints in place
 				}
 			} catch {
-				it.el.classList.remove('animate-pulse');
-				it.el.classList.add('mermaid-failed'); // keep showing the source
+				if (!it.rendered) restoreCode(it); // parse error → honest code fallback
+				// later theme re-renders that fail keep the last good diagram
 			}
 		}
 	}
 
-	void renderAll(true);
+	void renderAll();
 
 	// Theme flip → re-render with the new palette (attribute watch, no store coupling).
-	const observer = new MutationObserver(() => void renderAll(false));
+	const observer = new MutationObserver(() => void renderAll());
 	observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
 	return {

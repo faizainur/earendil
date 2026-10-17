@@ -88,6 +88,14 @@ Before a service touches production, its owner should be able to answer these wi
 
 If any of those require archaeology, the contract is incomplete.
 
+\`\`\`mermaid
+pie title what a noisy pager actually contains
+  "duplicate alerts" : 48
+  "flapping thresholds" : 27
+  "low-severity spam" : 15
+  "genuine pages" : 10
+\`\`\`
+
 ### What the pager actually needs
 
 The page itself is the last mile of observability. A page that does not name a ~~vague symptom~~ specific failed contract is noise wearing a trench coat.
@@ -272,6 +280,17 @@ Pushing the tail down usually means spending somewhere else: redundancy, caching
 ## Consequences for architecture
 
 Once the tail is the contract, fan-out gets cheaper than round trips, timeouts become design material, and a request that can say "not now" is more honest than one that promises to be on time.
+
+\`\`\`mermaid
+sequenceDiagram
+  participant U as visitor
+  participant E as edge
+  participant A as api
+  U->>E: request
+  E->>A: fan out
+  A-->>E: slowest hop decides
+  E-->>U: answer at p99
+\`\`\`
 
 \`\`\`yaml
 apiVersion: monitoring.googleapis.com/v1
