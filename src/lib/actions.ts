@@ -77,7 +77,7 @@ const WRAP_ICON = svg(
  * available; wrapping works regardless.
  */
 export function codeBlockTools(node: HTMLElement) {
-	const blocks: { pre: HTMLPreElement; toolbar: HTMLDivElement }[] = [];
+	const blocks: { pre: HTMLPreElement; toolbar: HTMLDivElement; wrapper: HTMLDivElement }[] = [];
 
 	for (const pre of Array.from(node.querySelectorAll('pre'))) {
 		const toolbar = document.createElement('div');
@@ -124,9 +124,16 @@ export function codeBlockTools(node: HTMLElement) {
 			toolbar.appendChild(copy);
 		}
 
-		pre.classList.add('relative', 'group');
-		pre.appendChild(toolbar);
-		blocks.push({ pre, toolbar });
+		// Anchor the bar to a wrapper, NOT the pre: an absolutely-positioned child of
+		// a horizontal scroll container is laid out against the unscrolled box and
+		// scrolls away with the content — so `right-2` would drift off-screen while
+		// the reader swipes through a long line. The wrapper never scrolls.
+		const wrapper = document.createElement('div');
+		wrapper.className = 'relative group';
+		pre.parentNode?.insertBefore(wrapper, pre);
+		wrapper.appendChild(pre);
+		wrapper.appendChild(toolbar);
+		blocks.push({ pre, toolbar, wrapper });
 	}
 
 	// Touch devices have no hover to reveal the toolbar with, and an always-visible
@@ -146,7 +153,7 @@ export function codeBlockTools(node: HTMLElement) {
 			});
 		}
 		retract = (e) => {
-			if ((e.target as HTMLElement | null)?.closest('pre')) return; // in-block taps handled above
+			if ((e.target as HTMLElement | null)?.closest('pre, .code-tools')) return; // in-block taps handled above
 			for (const b of blocks) b.toolbar.classList.remove('code-tools-open');
 		};
 		document.addEventListener('click', retract);
@@ -159,7 +166,12 @@ export function codeBlockTools(node: HTMLElement) {
 	return {
 		destroy() {
 			if (retract) document.removeEventListener('click', retract);
-			for (const { toolbar } of blocks) toolbar.remove();
+			// Reopen the fence: move the pre back out, dropping the wrapper (and its
+			// toolbar child) — listeners bound to the pre survive the reparent.
+			for (const { pre, wrapper } of blocks) {
+				wrapper.parentNode?.insertBefore(pre, wrapper);
+				wrapper.remove();
+			}
 		}
 	};
 }
