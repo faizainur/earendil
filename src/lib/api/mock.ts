@@ -218,6 +218,29 @@ flowchart LR
   BP -- refuses --> P
 \`\`\`
 
+\`\`\`mermaid
+erDiagram
+    subgraph title1
+        CUSTOMER
+        CUSTOMER {
+            string name
+            string custNumber
+            string sector
+        }
+    end
+    subgraph title2
+        CAR ||--o{ NAMED-DRIVER : allows
+        subgraph title3
+            PERSON
+            PERSON {
+                string firstName
+                string lastName
+                int age
+            }
+        end
+    end
+\`\`\`
+
 ## Backpressure is the feature
 
 Bounded buffers are uncomfortable because they expose the finite nature of the system. Once the buffer fills, the producer has to choose between waiting, retrying, rejecting work, or finding another path. That choice is not an implementation detail; it is the system's response to pressure.

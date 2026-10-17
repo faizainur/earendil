@@ -181,6 +181,26 @@ const RAMP_FAMILIES: Array<[string, number]> = [
 ];
 
 /**
+ * Zoom-snapshot sizing: mermaid sizes its output with `viewBox` + a `max-width`
+ * style (and percentage dimensions), which only works while the SVG is inline
+ * in the page. Serialized to a data-URL `<img>` there are no intrinsic
+ * dimensions — browsers fall back to a tiny default box. Bake explicit px
+ * width/height from the viewBox into a copy used for the snapshot.
+ */
+export function svgForZoom(svg: string): string {
+	const vb = /viewBox="[\d.-]+ [\d.-]+ ([\d.]+) ([\d.]+)"/.exec(svg);
+	if (!vb) return svg;
+	const w = Math.ceil(Number(vb[1]));
+	const h = Math.ceil(Number(vb[2]));
+	return svg.replace(/<svg\b([^>]*)>/, (_m, attrs: string) => {
+		const cleaned = attrs
+			.replace(/max-width:[^;"]*;?/g, '') // inline-only sizing, misleading inside <img>
+			.replace(/\s(?:width|height)="[^"]*"/g, ''); // percentage / stale dims
+		return `<svg${cleaned} width="${w}" height="${h}">`;
+	});
+}
+
+/**
  * Route B diagram rendering: hydrates `pre.mermaid-src` placeholders (emitted by
  * the markdown pipeline) with mermaid. The library is dynamically imported so its
  * chunk loads ONLY on pages that contain a diagram. JS visitors never see the raw
@@ -283,7 +303,7 @@ export function mermaidDiagrams(
 						span.classList.add('cursor-zoom-in');
 						span.addEventListener('click', () =>
 							onZoom({
-								src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(it.svg)}`,
+								src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgForZoom(it.svg))}`,
 								alt: 'Diagram'
 							})
 						);
