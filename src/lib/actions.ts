@@ -71,12 +71,13 @@ const WRAP_ICON = svg(
 
 /**
  * Adds an icon toolbar (Wrap | Copy, Lucide glyphs) to every `<pre>`, hidden until
- * the block is hovered or keyboard-focused (always visible on touch devices, see
- * layout.css). The Copy button is only mounted when the async clipboard is
+ * the block is hovered or keyboard-focused. Touch devices have no hover: there a
+ * tap on the block toggles the toolbar (a tap away retracts it — see
+ * .code-tools-open). The Copy button is only mounted when the async clipboard is
  * available; wrapping works regardless.
  */
 export function codeBlockTools(node: HTMLElement) {
-	const toolbars: HTMLDivElement[] = [];
+	const blocks: { pre: HTMLPreElement; toolbar: HTMLDivElement }[] = [];
 
 	for (const pre of Array.from(node.querySelectorAll('pre'))) {
 		const toolbar = document.createElement('div');
@@ -125,7 +126,30 @@ export function codeBlockTools(node: HTMLElement) {
 
 		pre.classList.add('relative', 'group');
 		pre.appendChild(toolbar);
-		toolbars.push(toolbar);
+		blocks.push({ pre, toolbar });
+	}
+
+	// Touch devices have no hover to reveal the toolbar with, and an always-visible
+	// one would sit on top of the code: tap a block to toggle its tools (one bar at
+	// a time), tap anywhere else to retract. Hover-capable devices keep the
+	// CSS-only group-hover behavior — nothing is registered for them.
+	const touch = window.matchMedia?.('(hover: none)').matches ?? false;
+	let retract: ((e: Event) => void) | null = null;
+	if (touch) {
+		for (const { pre, toolbar } of blocks) {
+			pre.addEventListener('click', (e) => {
+				// A tap on the tools themselves performs its action and keeps the bar open.
+				if ((e.target as HTMLElement).closest('.code-tools')) return;
+				const opening = !toolbar.classList.contains('code-tools-open');
+				for (const b of blocks) b.toolbar.classList.remove('code-tools-open');
+				if (opening) toolbar.classList.add('code-tools-open');
+			});
+		}
+		retract = (e) => {
+			if ((e.target as HTMLElement | null)?.closest('pre')) return; // in-block taps handled above
+			for (const b of blocks) b.toolbar.classList.remove('code-tools-open');
+		};
+		document.addEventListener('click', retract);
 	}
 
 	for (const img of node.querySelectorAll('img')) {
@@ -134,7 +158,8 @@ export function codeBlockTools(node: HTMLElement) {
 
 	return {
 		destroy() {
-			for (const toolbar of toolbars) toolbar.remove();
+			if (retract) document.removeEventListener('click', retract);
+			for (const { toolbar } of blocks) toolbar.remove();
 		}
 	};
 }
