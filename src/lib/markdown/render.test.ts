@@ -117,3 +117,13 @@ describe('renderMarkdown — ::: grid container', () => {
 		expect(html).toContain('::: nonsense');
 	});
 });
+
+describe('renderMarkdown — mermaid fences (Route B)', () => {
+	it('renders mermaid as a hydrating placeholder, never as Shiki output', async () => {
+		const { html } = await renderMarkdown('```mermaid\nflowchart LR\n  A --> B\n```\n');
+		expect(html).toContain('<pre class="mermaid-src">');
+		expect(html).not.toContain('shiki');
+		// Escaped source survives as the honest no-JS/failure fallback.
+		expect(html).toContain('A --&gt; B');
+	});
+});

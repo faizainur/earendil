@@ -33,6 +33,9 @@ const SHIKI_LANGS: BuiltinLanguage[] = [
 ];
 
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
+
+const escapeHtml = (s: string) =>
+	s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // `permalink` defaults to false in markdown-it-anchor v10 — heading ids only, no anchor icons.
 md.use(anchor, { level: [2, 3] });
 md.use(taskLists);
@@ -58,6 +61,15 @@ function markdownEngine(): Promise<MarkdownItInstance> {
 			fallbackLanguage: 'text' as BuiltinLanguage
 		}).then((shiki) => {
 			md.use(shiki);
+			// `mermaid` fences skip Shiki entirely: emit a placeholder the client
+			// action hydrates. The escaped source doubles as the no-JS fallback.
+			const shikiFence = md.renderer.rules.fence!;
+			md.renderer.rules.fence = (tokens, idx, opts, env, self) => {
+				if (tokens[idx].info.trim().split(/\s+/)[0] === 'mermaid') {
+					return `<pre class="mermaid-src"><code>${escapeHtml(tokens[idx].content)}</code></pre>\n`;
+				}
+				return shikiFence(tokens, idx, opts, env, self);
+			};
 			return md;
 		});
 	}

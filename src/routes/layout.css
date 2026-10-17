@@ -17,6 +17,13 @@
 	--border: #e4e4e7;
 	/* Brand accent — the semicolon in the wordmark, nothing else. */
 	--brand: #7c3aed;
+	/* Diagram palette — source of truth for client-rendered mermaid (Route B). */
+	--diagram-bg: #ffffff;
+	--diagram-surface: #f4f4f5;
+	--diagram-ink: #09090b;
+	--diagram-muted: #71717a;
+	--diagram-line: #e4e4e7;
+	--diagram-accent: #7c3aed;
 }
 
 [data-theme='dark'] {
@@ -29,6 +36,12 @@
 	--accent: #27272a;
 	--border: #27272a;
 	--brand: #a78bfa;
+	--diagram-bg: #131316;
+	--diagram-surface: #27272a;
+	--diagram-ink: #fafafa;
+	--diagram-muted: #a1a1aa;
+	--diagram-line: #27272a;
+	--diagram-accent: #a78bfa;
 }
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -240,6 +253,22 @@
 .prose img {
 	border: 1px solid var(--border);
 	border-radius: 8px;
+}
+/* Route B diagrams: pre-hydration placeholders (code fallback) + rendered SVG. */
+.prose .mermaid-src {
+	min-height: 10rem;
+}
+.prose .mermaid-failed {
+	border-style: dashed;
+}
+.prose .diagram {
+	display: block;
+	margin: 1.5rem 0;
+}
+.prose .diagram svg {
+	display: block;
+	width: 100%;
+	height: auto;
 }
 /* Serif section headings over sans body — the editorial pairing of the brand. */
 .prose :is(h2, h3) {

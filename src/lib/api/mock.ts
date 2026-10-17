@@ -202,6 +202,14 @@ A queue absorbs a burst by giving producers and consumers different speeds witho
 
 That pause is a contract. When consumers cannot keep up, the queue defines what happens next: work waits, work is dropped, or the producer is asked to slow down. A useful queue makes that decision visible instead of hiding it behind an apparently limitless buffer.
 
+\`\`\`mermaid
+flowchart LR
+  P[Producer] --> Q{{bounded queue}}
+  Q --> C[Consumer]
+  Q -- full --> BP[backpressure]
+  BP -- refuses --> P
+\`\`\`
+
 ## Backpressure is the feature
 
 Bounded buffers are uncomfortable because they expose the finite nature of the system. Once the buffer fills, the producer has to choose between waiting, retrying, rejecting work, or finding another path. That choice is not an implementation detail; it is the system's response to pressure.

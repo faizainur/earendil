@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { codeBlockTools, headingAnchors, tocSpy, zoomableImages } from '#lib/actions.ts';
+	import {
+		codeBlockTools,
+		headingAnchors,
+		mermaidDiagrams,
+		tocSpy,
+		zoomableImages
+	} from '#lib/actions.ts';
 	import ArticleTOC from '#lib/components/ArticleTOC.svelte';
 	import ImageLightbox from '#lib/components/ImageLightbox.svelte';
 	import type { LightboxImage } from '#lib/components/ImageLightbox.svelte';
@@ -89,6 +95,7 @@
 				use:tocSpy
 				use:headingAnchors
 				use:zoomableImages={(image) => (zoomed = image)}
+				use:mermaidDiagrams
 			>
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -- HTML is DOMPurify-sanitized in the server Markdown pipeline -->
 				{@html data.html}

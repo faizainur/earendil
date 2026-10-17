@@ -144,6 +144,19 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 ---
 
+## Milestone 6.5b — Route B: client-rendered diagrams (2026-10-17) · branch `feature/mermaid-client-render` ✅ (comparison build)
+
+**Goal:** render mermaid in the visitor's browser — deleting the whole BE render pipeline (jobs, S3, visible-gate, id allowlists).
+
+1. `render.ts`: `mermaid` fences bypass Shiki → `pre.mermaid-src` + escaped source (= SSR content, no-JS state, failure fallback — one thing does all three).
+2. `mermaidDiagrams` action: lazy `import('mermaid')` (separate chunk; only diagram pages pay ~1.4MB raw), init `theme: 'base'` + `securityLevel: 'strict'` with `themeVariables` read from `--diagram-*` tokens, render→swap, `animate-pulse` shimmer during the chunk gap, MutationObserver on `data-theme` re-renders live.
+3. Queue fixture gained a real ` ```mermaid ` flowchart; +1 pipeline test (25 total); SSR placeholder verified; chunks dir shows lazy split.
+4. Deliberately diverges from "FE renders payload as-is": mermaid is treated as a _renderer_ (like Shiki/TOC), not post-processing.
+
+**Compare against** `feature/a-inline-diagrams` (SSR inline, zero JS, needs the BE pipeline) — same `--diagram-*` token contract, so both render identically themed; decision after side-by-side eyeball: TTFB & layout shift (A) vs chunk fetch & post-hydration pop-in (B).
+
+---
+
 ## Milestone 7 — Responsive + a11y polish
 
 1. Screenshot-diff QA against **all 8 Flowstep screens** (theme × viewport).

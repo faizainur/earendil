@@ -149,6 +149,87 @@ export function focusOnMount(node: HTMLElement) {
 }
 
 /**
+ * Route B diagram rendering: hydrates `pre.mermaid-src` placeholders (emitted by
+ * the markdown pipeline) with mermaid. The library is dynamically imported so
+ * its chunk loads ONLY on pages that contain a diagram; the escaped source in
+ * the placeholder doubles as the honest no-JS / pre-hydration / failure state
+ * (shimmer via animate-pulse while the chunk loads). Re-renders when
+ * `data-theme` flips so diagrams follow the palette.
+ */
+export function mermaidDiagrams(node: HTMLElement) {
+	const items = [...node.querySelectorAll<HTMLElement>('pre.mermaid-src')].map((el) => ({
+		src: el.textContent ?? '',
+		el
+	}));
+	if (items.length === 0) return;
+
+	let disposed = false;
+	let seq = 0;
+	let ids = 0;
+
+	async function renderAll(initial: boolean) {
+		const my = ++seq;
+		let mermaid: typeof import('mermaid').default;
+		try {
+			mermaid = (await import('mermaid')).default;
+		} catch {
+			return; // offline/failed chunk — code fallbacks stay visible
+		}
+		if (disposed || my !== seq) return;
+		if (initial) for (const it of items) it.el.classList.add('animate-pulse');
+
+		const cs = getComputedStyle(document.documentElement);
+		const v = (name: string, fb: string) => cs.getPropertyValue(name).trim() || fb;
+		mermaid.initialize({
+			startOnLoad: false,
+			securityLevel: 'strict',
+			theme: 'base',
+			themeVariables: {
+				background: v('--diagram-bg', '#ffffff'),
+				primaryColor: v('--diagram-surface', '#f4f4f5'),
+				primaryTextColor: v('--diagram-ink', '#09090b'),
+				primaryBorderColor: v('--diagram-line', '#e4e4e7'),
+				lineColor: v('--diagram-muted', '#71717a'),
+				secondaryColor: v('--diagram-accent', '#7c3aed'),
+				fontFamily: v('--font-sans', 'ui-sans-serif, system-ui, sans-serif')
+			}
+		});
+
+		for (const it of items) {
+			try {
+				const { svg } = await mermaid.render(`fzr-mmd-${++ids}`, it.src);
+				if (disposed || my !== seq) return;
+				if (initial) {
+					const span = document.createElement('span');
+					span.className = 'diagram';
+					span.innerHTML = svg;
+					it.el.replaceWith(span);
+					it.el = span;
+				} else {
+					it.el.innerHTML = svg;
+				}
+			} catch {
+				it.el.classList.remove('animate-pulse');
+				it.el.classList.add('mermaid-failed'); // keep showing the source
+			}
+		}
+	}
+
+	void renderAll(true);
+
+	// Theme flip → re-render with the new palette (attribute watch, no store coupling).
+	const observer = new MutationObserver(() => void renderAll(false));
+	observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+	return {
+		destroy() {
+			disposed = true;
+			observer.disconnect();
+		}
+	};
+}
+
+/**
  * Makes every `<img>` inside the container click-to-zoom: adds a zoom cursor
  * and forwards `{ src, alt }` to the callback (the parent renders an ImageLightbox).
  */

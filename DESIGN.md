@@ -103,6 +103,7 @@ Rules:
 - **FE renders BE payloads as-is** — no post-processing of any data (articles, list, search, suggestions): no FE-side sorting, filtering, or derived fields. Curation (list order, the featured hero photograph, tag sets) is expressed by the BE in its response.
 - **Article meta is JSON fields, not frontmatter embedded in Markdown** — list/search views must show title/date/readTime/thumbnail without fetching or parsing full content. (If BE stores frontmatter, BE parses it.)
 - **readTime is computed by the BE** at publish time, never in the FE.
+- **Diagrams render client-side (Route B — this branch)**: ` ```mermaid ` fences skip Shiki and emit `<pre class="mermaid-src"><code>escaped source</code></pre>`; the `mermaidDiagrams` action lazy-imports mermaid (own chunk — only diagram pages pay it), renders with `securityLevel: strict` and `themeVariables` derived from the `--diagram-*` tokens, and re-renders on theme flip. The escaped source is simultaneously the SSR content, the no-JS state, and the failure fallback. The BE ships raw fences — **no publish render pipeline**. (Comparison branch: `feature/a-inline-diagrams` keeps the BE-rendered, SSR-inlined design.)
 - Mock adapter ships a 12-post fixture corpus (spans two home pages so pagination is exercisable), a featured hero photo, and "queue"-matching search fixtures until BE is live.
 
 ## 5. Search & Suggestion (BE-driven)
