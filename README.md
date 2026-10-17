@@ -14,7 +14,7 @@ SvelteKit frontend for the Markdown-driven personal blog of **Faiz Ainur Rofiq**
 | `/gallery`      | Full Pinterest-style masonry with lightbox                                                                                             |
 | `/about`        | Static bio                                                                                                                             |
 
-Plus: **⌘K / `Mod+K` command palette** (capped launcher with see-all hand-off), cookie-persisted light/dark (View-Transitions circular reveal), brand-violet route progress bar, staggered fade entrances, animated mobile hamburger.
+Plus: **⌘K / `Mod+K` command palette** (capped launcher with see-all hand-off), cookie-persisted light/dark (View-Transitions cross-fade), brand-violet route progress bar, staggered fade entrances, animated mobile hamburger.
 
 **Stack:** Svelte 5 + SvelteKit (Kit 3) + TypeScript · Tailwind v4 (semantic token palette, ~7 deliberate raw-CSS exceptions) · markdown-it pipeline (anchors, task lists, container directive) + Shiki + DOMPurify · vitest. Docs: [DESIGN.md](DESIGN.md) (living spec) · [PLAN.md](PLAN.md) (milestones & status) · [ARCHITECTURE.md](ARCHITECTURE.md) (backend K3s blueprint).
 

@@ -44,7 +44,7 @@
 			document.documentElement.dataset.theme = next;
 			document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
 		};
-		// Circular reveal of the new palette (see theme-reveal in layout.css); instant where unsupported.
+		// Palette swap via View Transitions (UA cross-fade; instant where unsupported).
 		if (document.startViewTransition) document.startViewTransition(apply);
 		else apply();
 	}

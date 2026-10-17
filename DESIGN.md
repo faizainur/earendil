@@ -135,7 +135,7 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
-3. Theme-switch circular reveal — `::view-transition-*(root)` + `theme-reveal` keyframes (View Transitions API; pseudo-elements not reachable via utilities).
+3. Theme-switch View Transitions — reduced-motion opt-out on `::view-transition-*(root)` (pseudo-elements not reachable via utilities); the swap itself is the UA-default cross-fade on every device (the old `theme-reveal` clip-path bloom stuttered on 60Hz mobile panels and was retired).
 4. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — overflowing code blocks and masonry gutters; pseudo-elements aren't reachable via utilities.
 5. Route-change progress bar (`.route-progress`) — fixed 2px brand-violet bar; active/finishing/idle phases driven by `$app/state navigating` (minimum visible beat for preloaded instant navigations; hash-only jumps excluded).
 6. Entrance choreography — `.fade-up` (staggered rise for page sections, per-section `animation-delay`) and `.fade-in` (pure-opacity swap for paginated/filterable lists via `{#key}` re-mount); reduced-motion disables both.

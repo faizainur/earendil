@@ -185,28 +185,13 @@
 	}
 }
 
-/* Theme switch: circular reveal of the new snapshot, growing from the navbar's
-   toggle corner. Skipped automatically for prefers-reduced-motion (view
-   transitions fall back to instant swap). */
-::view-transition-image-pair(root) {
-	isolation: isolate;
-}
-::view-transition-old(root) {
-	animation: none;
-}
-::view-transition-new(root) {
-	animation: theme-reveal 0.45s ease-in-out;
-}
-@keyframes theme-reveal {
-	from {
-		clip-path: circle(0 at min(calc(100% - 5rem), calc(50% + 32rem)) 2.4rem);
-	}
-	to {
-		clip-path: circle(160vmax at min(calc(100% - 5rem), calc(50% + 32rem)) 2.4rem);
-	}
-}
-
+/* Theme switch: plain View Transition cross-fade (the UA default old→new snapshot
+   fade) — identical on desktop and touch, and cheap on 60Hz panels. The circular
+   "bloom" reveal was retired: clip-path over a viewport-sized snapshot re-rasters
+   every frame and stutters on mobile GPUs. Reduced-motion users get an instant
+   swap (the UA gates its own defaults similarly — belt and braces). */
 @media (prefers-reduced-motion: reduce) {
+	::view-transition-old(root),
 	::view-transition-new(root) {
 		animation: none;
 	}
