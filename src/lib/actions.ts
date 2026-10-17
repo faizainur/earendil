@@ -149,28 +149,32 @@ export function focusOnMount(node: HTMLElement) {
 }
 
 /** mermaid themeVariable → CSS token. layout.css is the ONLY source of color —
- * change diagram colors there, never here. Mermaid derives every other
- * per-diagram var (clusterBkg, noteBkgColor, pie5+…) from these base entries,
- * so do NOT enumerate extras. Hard constraint: mermaid reads hex only
- * (#rgb/#rrggbb) — enforced by theming.contract.test.ts, not by review. */
+ * change diagram colors there, never here.
+ *
+ * Deliberately NEUTRALS ONLY: entities/actors cycle the theme's own categorical
+ * palette (redux-color's borderColorArray/bkgColorArray — the per-box variance
+ * that makes the look). The theme's updateColors() keeps `x = x || <derived>`
+ * guards, so these neutrals win; overriding the primary/secondary/tertiary
+ * trio instead would flatten the variance, and vars the theme pins
+ * unconditionally (mainBkg, notes) must stay its. Chart-type series families
+ * (variable-driven, not array-cycled) come from RAMP below.
+ * Hard constraint: mermaid reads hex only (#rgb/#rrggbb) — enforced by
+ * theming.contract.test.ts, not by review. */
 const MERMAID_VARS = {
 	background: '--diagram-bg',
-	mainBkg: '--diagram-bg',
-	primaryColor: '--diagram-surface',
 	primaryTextColor: '--diagram-ink',
-	primaryBorderColor: '--diagram-line',
-	secondaryColor: '--diagram-accent',
-	tertiaryColor: '--diagram-surface',
-	lineColor: '--diagram-muted',
-	textColor: '--diagram-ink'
+	textColor: '--diagram-ink',
+	lineColor: '--diagram-muted'
 } as const;
 
-/** Categorical ramp (series that must be visually distinct) — layout.css owns the hues.
+/** Categorical ramp (chart-type series that are variable-driven rather than
+ *  array-cycled) — layout.css owns the hues. Entity colors for the 10 redux
+ *  types come from the THEME's own borderColorArray/bkgColorArray (the per-box
+ *  variance) — deliberately NOT overridden: flattening them kills the look,
+ *  and the dark counterpart intentionally ships an empty fill array for contrast.
  *  `base` is each family's starting index: mermaid's pie vars are 1-based, the rest 0-based.
  *  Families: pie (pie charts), git (gitGraph branches), fillType (user-journey steps),
- *  series (xyChart bars/lines), cScale (quadrantChart + radar point colors).
- *  Everything else (clusterBkg, noteBkgColor, gantt sections, actor fills…) is
- *  left to mermaid's own derivation from the base palette — do not enumerate more. */
+ *  series (xyChart bars/lines), cScale (quadrantChart + radar point colors). */
 const RAMP = ['--diagram-cat-1', '--diagram-cat-2', '--diagram-cat-3', '--diagram-cat-4'] as const;
 const RAMP_FAMILIES: Array<[string, number]> = [
 	['pie', 1],
@@ -199,6 +203,11 @@ export function svgForZoom(svg: string): string {
 		return `<svg${cleaned} width="${w}" height="${h}">`;
 	});
 }
+
+/** The v12 categorical themes: entities cycle the theme's own 12-hue palette.
+ *  Dark gets its named counterpart (its fill array is deliberately empty —
+ *  saturated fills lose contrast behind light text). */
+const isDarkMode = () => document.documentElement.dataset.theme === 'dark';
 
 /**
  * Route B diagram rendering: hydrates `pre.mermaid-src` placeholders (emitted by
@@ -252,7 +261,7 @@ export function mermaidDiagrams(
 		const cs = getComputedStyle(document.documentElement);
 		const vars: Record<string, string | boolean> = {
 			// Mode flag, not a color: flips mermaid's derived-tone direction.
-			darkMode: document.documentElement.dataset.theme === 'dark'
+			darkMode: isDarkMode()
 		};
 		const font = cs.getPropertyValue('--font-sans').trim();
 		if (font) vars.fontFamily = font;
@@ -286,8 +295,13 @@ export function mermaidDiagrams(
 		mermaid.initialize({
 			startOnLoad: false,
 			securityLevel: 'strict',
-			theme: 'base', // the only customizable theme
-			look: 'classic', // pins over v12's mixed per-type defaults (neo for 10 types, classic for the rest)
+			// v12 categorical themes: entities/actors/subgraph branches cycle the
+			// theme's own 12-hue palette (the per-box variance); neutrals come from
+			// our tokens; dark swaps to the contrast-tuned counterpart.
+			theme: isDarkMode() ? 'redux-dark-color' : 'redux-color',
+			// look deliberately unset: the 10 categorical types pair with `neo`
+			// geometry (rounded boxes, 2px colored borders), chart types keep
+			// `classic` — matching the look of each family's own palette.
 			themeVariables: themeVariables()
 		});
 		for (const it of items) {
