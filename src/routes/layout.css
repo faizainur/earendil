@@ -193,17 +193,6 @@
 	}
 }
 
-/* Dialog/lightbox entrance — shared pattern with the future search palette (DESIGN.md §5). */
-@keyframes zoom-in {
-	from {
-		opacity: 0;
-		transform: scale(0.94);
-	}
-}
-.dialog-zoom {
-	animation: zoom-in 180ms ease-out;
-}
-
 /**
  * Shiki dual-theme CSS-var mapping — raw-CSS exception #2 (DESIGN.md §7).
  * Fences are highlighted server-side with `defaultColor: false`, so tokens
@@ -331,11 +320,5 @@
 	}
 	.prose .heading-anchor {
 		display: none;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.dialog-zoom {
-		animation: none;
 	}
 }

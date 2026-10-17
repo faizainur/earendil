@@ -11,7 +11,7 @@
 | Framework          | **Svelte 5 + SvelteKit** (TypeScript, Vite)                                                                                                                | Small bundle, great interactions (search palette), file-based routing, SSR                                                                              |
 | Fonts              | **Inter** (variable, self-hosted `@fontsource-variable/inter`) + **JetBrains Mono** (`@fontsource/jetbrains-mono`) + **Fraunces Variable** (wordmark only) | Sans matches the mockup grotesque; self-hosted = no external request/FOUT. Fraunces (SOFT/WONK axes) is the `fzr;` brand serif — never used for body/UI |
 | Rendering          | **SSR** via `adapter-node`                                                                                                                                 | SEO (articles crawlable), server-side API fetch in load functions, fits K3s 256/512Mi backend container budget                                          |
-| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                                                                  | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~7 exceptions, §7)                                                            |
+| Styling            | **Tailwind CSS v4** (`@tailwindcss/vite`)                                                                                                                  | Config lives in CSS (`@theme`), no `tailwind.config.js`; minimal raw CSS (~6 exceptions, §7)                                                            |
 | Markdown           | **markdown-it** + `markdown-it-anchor` + `markdown-it-container` (`::: grid` masonry) + task-lists                                                         | Runtime content from API ⇒ mdsvex (build-time) is not applicable; token access powers TOC/anchors                                                       |
 | Sanitization       | **DOMPurify** (`isomorphic-dompurify`, server-side)                                                                                                        | Mandatory — API content treated as untrusted                                                                                                            |
 | Code highlighting  | **Shiki, server-side**, dual-theme mode (`themes: { light, dark }`)                                                                                        | VS Code-grade grammars; client ships plain highlighted HTML; theme flips via CSS vars without refetch                                                   |
@@ -134,11 +134,10 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
-3. Zoom-in keyframe (`.dialog-zoom`) for the gallery lightbox; the search dialog uses svelte `fade`+`scale` transitions instead (see §5) so its close animates too.
-4. Theme-switch circular reveal — `::view-transition-*(root)` + `theme-reveal` keyframes (View Transitions API; pseudo-elements not reachable via utilities).
-5. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — overflowing code blocks and masonry gutters; pseudo-elements aren't reachable via utilities.
-6. Route-change progress bar (`.route-progress`) — fixed 2px brand-violet bar; active/finishing/idle phases driven by `$app/state navigating` (minimum visible beat for preloaded instant navigations; hash-only jumps excluded).
-7. Entrance choreography — `.fade-up` (staggered rise for page sections, per-section `animation-delay`) and `.fade-in` (pure-opacity swap for paginated/filterable lists via `{#key}` re-mount); reduced-motion disables both.
+3. Theme-switch circular reveal — `::view-transition-*(root)` + `theme-reveal` keyframes (View Transitions API; pseudo-elements not reachable via utilities).
+4. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — overflowing code blocks and masonry gutters; pseudo-elements aren't reachable via utilities.
+5. Route-change progress bar (`.route-progress`) — fixed 2px brand-violet bar; active/finishing/idle phases driven by `$app/state navigating` (minimum visible beat for preloaded instant navigations; hash-only jumps excluded).
+6. Entrance choreography — `.fade-up` (staggered rise for page sections, per-section `animation-delay`) and `.fade-in` (pure-opacity swap for paginated/filterable lists via `{#key}` re-mount); reduced-motion disables both.
 
 ## 8. Responsive matrix
 
