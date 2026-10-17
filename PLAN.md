@@ -135,7 +135,7 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 **Goal:** Screens 1/5 dialog + mobile triggers.
 
-1. `SearchDialog.svelte`: centered rounded dialog (`max-w-2xl`), dim + `backdrop-filter: blur`, dialog-zoom transition (raw-CSS exception #3); mobile sheet via padding; input focused at mount (the `autofocus` attribute no-ops on dynamic dialogs).
+1. `SearchDialog.svelte`: centered rounded dialog (`max-w-2xl`), dim + `backdrop-filter: blur`, symmetric svelte `fade`+`scale` open/close transitions; mobile sheet via padding; input focused at mount (the `autofocus` attribute no-ops on dynamic dialogs).
 2. Global `Mod+K`/`Ctrl+K` keybind; pill click; mobile icon-button tap.
 3. Debounced (200ms) suggest calls guarded by a monotonic request-sequence counter (no AbortSignal in `suggestPosts`); result rows (optional thumbnail/title/preview/date+readTime); Enter/click → navigate; loading skeletons; empty state; see-all hand-off to `/search` (M3.6).
 4. A11y: focus trap, `role="dialog"`, Esc closes, focus restore.

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { Search } from 'lucide-svelte';
+	import { cubicOut } from 'svelte/easing';
+	import { fade, scale } from 'svelte/transition';
 	import { focusOnMount } from '#lib/actions.ts';
 	import { api } from '#lib/api/index.ts';
 	import type { PostSummary } from '#lib/api/index.ts';
@@ -10,6 +12,15 @@
 	}
 
 	let { onClose }: Props = $props();
+
+	// Svelte transitions (unlike the mount-only CSS keyframe) animate BOTH
+	// directions: scrim fades, card zooms. SSR-guarded — $derived evaluates
+	// on the server too, where window is absent.
+	const reduced = $derived(
+		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+	);
+	const fadeOpts = $derived({ duration: reduced ? 0 : 150 });
+	const scaleOpts = $derived({ start: 0.94, duration: reduced ? 0 : 150, easing: cubicOut });
 
 	const DEBOUNCE_MS = 200;
 	const LIMIT = 8;
@@ -128,6 +139,7 @@
 <div
 	class="fixed inset-0 z-30 flex items-start justify-center bg-background/70 p-4 pt-8 backdrop-blur-sm"
 	role="presentation"
+	transition:fade={fadeOpts}
 	onclick={(e) => {
 		if (e.target === e.currentTarget) onClose();
 	}}
@@ -137,7 +149,8 @@
 		role="dialog"
 		aria-modal="true"
 		aria-label="Search"
-		class="dialog-zoom flex max-h-[calc(100vh-4rem)] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-card shadow"
+		class="flex max-h-[calc(100vh-4rem)] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-card shadow"
+		transition:scale={scaleOpts}
 	>
 		<div class="flex items-center gap-3 border-b border-border px-5 py-4">
 			<Search class="size-5 shrink-0 text-muted-foreground" />

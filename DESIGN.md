@@ -110,7 +110,7 @@ Rules:
 **Command palette dialog**, matching Screens 1/5:
 
 - Opens: `Mod+K` / `Ctrl+K` globally · click pill (desktop) · tap icon button (mobile).
-- Dialog: centered rounded card (`max-w-2xl` desktop; `inset-x-3` near-full-width sheet on mobile), over **dimmed + softly blurred** background (`backdrop-filter: blur`), approximating the pill-zoom transition.
+- Dialog: centered rounded card (`max-w-2xl` desktop; `inset-x-3` near-full-width sheet on mobile), over **dimmed + softly blurred** background (`backdrop-filter: blur`). Opens and closes symmetrically: scrim `fade` + card `scale` (150ms cubic-out via `svelte/transition` — a mount-only CSS keyframe cannot animate unmount; reduced-motion collapses to instant).
 - Focused input on open (mount-time `focus()` — the `autofocus` attribute no-ops on dynamic dialogs); results render **below the input** inside the dialog.
 - Per keystroke: **200ms debounce** → `suggestPosts` (`/api/search/suggest`, capped 8), guarded by a **monotonic request sequence** (stale responses dropped — `suggestPosts` takes no AbortSignal).
 - Result row: small thumbnail (when present), title, 1–2 line preview, date + read time. Enter/click → `/posts/:slug`.
@@ -134,7 +134,7 @@ Perf — Shiki bundled language set (confirmed): `go, rust, clojure, javascript,
 
 1. `.prose` overrides for markdown content (outside Svelte scope) — layered on `@tailwindcss/typography`.
 2. Shiki `--shiki-light` / `--shiki-dark` variable mapping so code colors flip with `data-theme`.
-3. Zoom-in keyframe (`.dialog-zoom`) shared by the gallery lightbox and the search dialog.
+3. Zoom-in keyframe (`.dialog-zoom`) for the gallery lightbox; the search dialog uses svelte `fade`+`scale` transitions instead (see §5) so its close animates too.
 4. Theme-switch circular reveal — `::view-transition-*(root)` + `theme-reveal` keyframes (View Transitions API; pseudo-elements not reachable via utilities).
 5. Slim themed horizontal scrollbar (`.scroll-slim` + `.prose pre`) — overflowing code blocks and masonry gutters; pseudo-elements aren't reachable via utilities.
 6. Route-change progress bar (`.route-progress`) — fixed 2px brand-violet bar; active/finishing/idle phases driven by `$app/state navigating` (minimum visible beat for preloaded instant navigations; hash-only jumps excluded).
