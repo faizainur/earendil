@@ -4,6 +4,18 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+	server: {
+		// Tunnel testing (ngrok hands out a fresh random hostname per session, so
+		// match by suffix — a leading dot means "this domain and all subdomains",
+		// stable even when the URL regenerates). Extra hosts: ALLOWED_HOSTS=h1,h2.
+		allowedHosts: [
+			'.ngrok-free.app',
+			'.ngrok.app',
+			...(process.env.ALLOWED_HOSTS?.split(',')
+				.map((h) => h.trim())
+				.filter(Boolean) ?? [])
+		]
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({
