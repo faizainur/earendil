@@ -181,7 +181,10 @@ export function focusOnMount(node: HTMLElement) {
  * resets. Motion lives on the img's own transform, so the figure's enter/exit
  * transitions and the backdrop's tap-away (direct-target-only) are untouched.
  */
-export function pinchZoom(node: HTMLElement) {
+export function pinchZoom(
+	node: HTMLElement,
+	opts?: { onZoomChange?: (zoomedIn: boolean) => void }
+) {
 	node.style.touchAction = 'none'; // the element owns the gesture; browser page-zoom would fight it
 	node.style.userSelect = 'none';
 	node.setAttribute('draggable', 'false');
@@ -199,6 +202,7 @@ export function pinchZoom(node: HTMLElement) {
 	// glued to the (moving) midpoint as the scale changes.
 	let pinch: { d0: number; s0: number; ux: number; uy: number } | null = null;
 	let panFrom: { x: number; y: number; tx: number; ty: number } | null = null;
+	let wasZoomed = false; // last zoom state reported to the host
 
 	const mid = () => {
 		const [a, b] = [...pointers.values()];
@@ -212,6 +216,13 @@ export function pinchZoom(node: HTMLElement) {
 	function apply(animate = false) {
 		node.style.transition = animate ? 'transform 180ms ease-out' : 'none';
 		node.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+		// Painted beyond the layout box while zoomed — let the host react (e.g. fade
+		// the caption, which would otherwise sit underneath the enlarged image).
+		const zoomedIn = scale > 1;
+		if (zoomedIn !== wasZoomed) {
+			wasZoomed = zoomedIn;
+			opts?.onZoomChange?.(zoomedIn);
+		}
 		if (animate) {
 			const done = () => (node.style.transition = 'none');
 			node.addEventListener('transitionend', done, { once: true });
@@ -293,6 +304,11 @@ export function pinchZoom(node: HTMLElement) {
 				ty = 0;
 			} else {
 				clampT();
+			}
+			// apply() may no-op (transform already identity) — notify unconditionally.
+			if (scale > 1 !== wasZoomed) {
+				wasZoomed = scale > 1;
+				opts?.onZoomChange?.(wasZoomed);
 			}
 			apply(true);
 		}

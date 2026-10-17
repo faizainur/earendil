@@ -23,6 +23,10 @@
 	const fadeOpts = $derived({ duration: reduced ? 0 : 150 });
 	const scaleOpts = $derived({ start: 0.94, duration: reduced ? 0 : 150, easing: cubicOut });
 
+	// A zoomed image paints past its layout box and would cover the caption —
+	// retract it while zoomed (the pinchZoom action reports the crossing).
+	let zoomed = $state(false);
+
 	// Esc closes the lightbox while it is mounted.
 	$effect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -46,10 +50,16 @@
 		<img
 			src={image.src}
 			alt={image.alt}
-			use:pinchZoom
+			use:pinchZoom={{ onZoomChange: (z) => (zoomed = z) }}
 			class="max-h-[80vh] max-w-[min(92vw,64rem)] rounded-xl border border-border object-contain shadow-xl"
 		/>
-		<figcaption class="pt-3 text-center text-sm text-muted-foreground">{image.alt}</figcaption>
+		<figcaption
+			class="pt-3 text-center text-sm text-muted-foreground transition-opacity duration-150"
+			class:opacity-0={zoomed}
+			aria-hidden={zoomed}
+		>
+			{image.alt}
+		</figcaption>
 	</figure>
 	<button
 		type="button"
