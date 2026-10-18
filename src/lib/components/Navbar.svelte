@@ -84,9 +84,7 @@
 			href="/"
 			class="font-brand text-3xl leading-none font-semibold tracking-tight"
 			style="font-variation-settings: 'SOFT' 40, 'WONK' 1"
-			aria-label="fzr; — home"
-		>
-			fzr<span class="pl-1 text-brand">;</span></a
+			aria-label="gofar; — home">gofar<span class="pl-1 text-brand">;</span></a
 		>
 		<div class="flex items-center gap-2 md:gap-8">
 			<!-- Desktop: inline links -->
