@@ -148,6 +148,8 @@ Companion to `DESIGN.md` in this directory. Each milestone ends with a verifiabl
 
 **Goal:** render mermaid in the visitor's browser — deleting the whole BE render pipeline (jobs, S3, visible-gate, id allowlists).
 
+> **Decision (2026-10-18):** adopted after the side-by-side comparison with `feature/a-inline-diagrams`; merged to `master` as the shipped design. The Route A branch stays unmerged for reference.
+
 1. `render.ts`: `mermaid` fences bypass Shiki → `pre.mermaid-src` + escaped source (= SSR content, no-JS state, failure fallback — one thing does all three).
 2. `mermaidDiagrams` action: lazy `import('mermaid')` (separate chunk; only diagram pages pay ~1.4MB raw), init `theme: 'base'` + `securityLevel: 'strict'` with `themeVariables` read from `--diagram-*` tokens, render→swap, `animate-pulse` shimmer during the chunk gap, MutationObserver on `data-theme` re-renders live.
 3. Queue fixture gained a real ` ```mermaid ` flowchart; +1 pipeline test (25 total); SSR placeholder verified; chunks dir shows lazy split.
