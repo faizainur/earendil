@@ -245,26 +245,21 @@
 	border: 1px solid var(--border);
 	border-radius: 8px;
 }
-/* Route B diagrams: placeholders become a shimmer skeleton the moment the
-   action runs; the escaped source stays for no-JS and render failures. */
+/* Route B diagrams: the SSR placeholder IS the shimmer skeleton — zero flash of
+   raw source while the lazy mermaid chunk loads. The escaped source stays in the
+   DOM (crawlers; app.html's <noscript> restores it when JS is off; a failed
+   render restores it via .mermaid-failed). The action only swaps the outcome. */
 .prose .mermaid-src {
-	min-height: 10rem;
-}
-.prose .mermaid-failed {
-	border-style: dashed;
-}
-.prose .diagram-loading {
 	position: relative;
 	overflow: hidden;
-	display: block;
 	min-height: 10rem;
-	margin: 1.5rem 0;
 	border: 1px solid var(--diagram-line);
-	border-radius: 8px;
 	background: var(--diagram-surface);
-	color: transparent; /* read by AT, painted over by the sweep */
 }
-.prose .diagram-loading::after {
+.prose .mermaid-src > code {
+	visibility: hidden;
+}
+.prose .mermaid-src::after {
 	content: '';
 	position: absolute;
 	inset: 0;
@@ -278,9 +273,20 @@
 	}
 }
 @media (prefers-reduced-motion: reduce) {
-	.prose .diagram-loading::after {
+	.prose .mermaid-src::after {
 		animation: none;
 	}
+}
+/* Render failed → honest fallback: the source as a normal, scrollable code card. */
+.prose .mermaid-failed {
+	overflow-x: auto;
+	border-style: dashed;
+}
+.prose .mermaid-failed > code {
+	visibility: visible;
+}
+.prose .mermaid-failed::after {
+	display: none;
 }
 .prose .diagram {
 	display: block;

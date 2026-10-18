@@ -432,10 +432,11 @@ const isDarkMode = () => document.documentElement.dataset.theme === 'dark';
 /**
  * Route B diagram rendering: hydrates `pre.mermaid-src` placeholders (emitted by
  * the markdown pipeline) with mermaid. The library is dynamically imported so its
- * chunk loads ONLY on pages that contain a diagram. JS visitors never see the raw
- * source: placeholders are swapped for a shimmer skeleton on the hydration tick,
- * while the escaped source remains the no-JS state and the per-diagram failure
- * fallback. Rendered diagrams are click-to-zoom through the page's ImageLightbox
+ * chunk loads ONLY on pages that contain a diagram. The placeholder pre IS the
+ * shimmer skeleton (pure CSS from first paint — no flash of raw source, even
+ * before hydration); the escaped source stays hidden in the DOM for crawlers and
+ * reappears as the honest fallback for <noscript> users and failed renders.
+ * Rendered diagrams are click-to-zoom through the page's ImageLightbox
  * (data-URL snapshot of the current SVG — mermaid bakes concrete hex colors into
  * its output, so an `<img>` renders it identically). Re-renders when `data-theme`
  * flips so diagrams follow the palette.
@@ -447,29 +448,25 @@ export function mermaidDiagrams(
 	const items = [...node.querySelectorAll<HTMLElement>('pre.mermaid-src')].map((pre) => ({
 		src: pre.textContent ?? '',
 		pre,
-		host: pre, // placeholder → skeleton → rendered span
+		host: pre, // placeholder (CSS shimmer) → rendered span
 		rendered: false,
 		svg: '' // current markup, snapshotted on zoom click
 	}));
 	if (items.length === 0) return;
 
-	// Synchronous swap: the shimmer skeleton covers the lazy-chunk gap.
+	// The placeholder pre already shimmers (pure CSS, from first paint) — JS only
+	// flags it busy for AT until the lazy chunk resolves and the swap lands.
 	for (const it of items) {
-		const sk = document.createElement('span');
-		sk.className = 'diagram-loading';
-		sk.setAttribute('role', 'status');
-		sk.setAttribute('aria-busy', 'true');
-		sk.textContent = 'Loading diagram'; // announced by AT, painted over by CSS
-		it.pre.replaceWith(sk);
-		it.host = sk;
+		it.pre.setAttribute('aria-busy', 'true');
 	}
 
 	const restoreCode = (it: (typeof items)[number]) => {
+		it.pre.removeAttribute('aria-busy');
 		if (it.host !== it.pre) {
 			it.host.replaceWith(it.pre);
 			it.host = it.pre;
 		}
-		it.pre.classList.add('mermaid-failed'); // dashed border = "this was a diagram"
+		it.pre.classList.add('mermaid-failed'); // reveals the source, dashed border
 	};
 
 	let disposed = false;

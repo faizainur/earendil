@@ -5,6 +5,21 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
 		%sveltekit.head%
+		<noscript>
+			<!-- Route B diagrams shimmer as a placeholder until the client renders
+			     them; with JS off the animation never comes — restore the source. -->
+			<style>
+				.prose .mermaid-src::after {
+					display: none;
+				}
+				.prose .mermaid-src {
+					overflow-x: auto;
+				}
+				.prose .mermaid-src > code {
+					visibility: visible;
+				}
+			</style>
+		</noscript>
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
